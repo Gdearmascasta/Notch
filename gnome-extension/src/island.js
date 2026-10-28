@@ -26,6 +26,10 @@ const SHAPE_PAD = 1;
 /** Where a view shown out of sight is moved (see `warmView`): far above the island, beyond its clip. */
 const OUT_OF_REACH = -10000;
 
+/** How opaque the closed island's black is: nearly solid, so what is behind it never shows through its text. */
+const ISLAND_ALPHA = 0.85;
+/** A faint light edge, so the island still stands out on a dark wallpaper. */
+const BORDER_ALPHA = 0.12;
 /** How long a tint takes to come and go: a wash, and a glow (which lingers out). */
 const TINT_FADE = {wash: [450, 450], glow: [380, 1100], aura: [300, 500]};
 
@@ -65,6 +69,8 @@ export const Island = GObject.registerClass({
 
         /** Height of the top bar the island grows out of; 0 for none. */
         this._topInset = 0;
+        /** Whether the island shows more than its closed view: open, it is solid black, as Isle draws it. */
+        this._solid = false;
         this._hovered = false;
         this._monitor = null;
         this._view = null;
@@ -151,6 +157,14 @@ export const Island = GObject.registerClass({
     set topInset(height) {
         this._topInset = height;
         this._sync();
+    }
+
+    /** Whether the island is drawn solid black instead of see-through. */
+    set solid(solid) {
+        if (solid === this._solid)
+            return;
+        this._solid = solid;
+        this._shape.queue_repaint();
     }
 
     /** The top bar's height, as last set. */
@@ -451,7 +465,7 @@ export const Island = GObject.registerClass({
         cr.translate(SHAPE_PAD + this._islandFraction, 0);
         const height = Math.max(0, this._height.value);
         this._outline(cr, height);
-        cr.setSourceRGBA(0, 0, 0, 1);
+        cr.setSourceRGBA(0, 0, 0, this._solid ? 1 : ISLAND_ALPHA);
         cr.fillPreserve();
         if (this._tint && this._tintStrength > 0 && this._tintStyle !== 'aura') {
             const {left, right, top} = this._outlineBox;
@@ -461,6 +475,20 @@ export const Island = GObject.registerClass({
             }
         }
         cr.newPath();
+        if (this._solid) {
+            cr.$dispose();
+            return;
+        }
+        // The edge is drawn inside the shape, and not along the screen's top, which the island hangs from.
+        cr.save();
+        cr.rectangle(-SHAPE_PAD, px(1), 100000, height);
+        cr.clip();
+        this._outline(cr, height);
+        cr.clipPreserve();
+        cr.setSourceRGBA(1, 1, 1, BORDER_ALPHA);
+        cr.setLineWidth(px(2));
+        cr.stroke();
+        cr.restore();
         cr.$dispose();
     }
 

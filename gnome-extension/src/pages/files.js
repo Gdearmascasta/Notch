@@ -238,11 +238,11 @@ class FilesView extends St.Widget {
     /** What the empty shelf says, as the helper does: where to drop, and what then. */
     _updateEmptyText() {
         const dragging = this._dropping && this._helperAvailable;
-        let title = 'Drop files here', hint = 'Then drag them into any app, or click to copy';
+        let title = 'Suelta archivos aquí', hint = 'Luego arrástralos a cualquier app, o haz clic para copiar';
         if (!this._helperAvailable)
-            [title, hint] = ['No files on the shelf', 'Drag and drop needs the shelf helper; run install.sh again'];
+            [title, hint] = ['No hay archivos en la bandeja', 'Arrastrar y soltar necesita el ayudante de la bandeja; vuelve a ejecutar install.sh'];
         else if (dragging)
-            [title, hint] = [this._dropOver ? 'Release to add it' : 'Drop to add it', 'Then drag it into any app, or click to copy it'];
+            [title, hint] = [this._dropOver ? 'Suelta para añadirlo' : 'Suelta para añadirlo', 'Luego arrástralo a cualquier app, o haz clic para copiarlo'];
         this._emptyTitle.text = title;
         this._emptyHint.text = hint;
     }
@@ -264,7 +264,7 @@ class FilesView extends St.Widget {
             child: new St.Icon({gicon: icon('isle-check-symbolic'), icon_size: 18}),
         });
         const remove = iconButton('isle-close-symbolic', 'isle-shelf-remove',
-            () => this._daemon.call('shelf', 'Remove', item.uri), {size: 10, accessibleName: 'Remove from the shelf'});
+            () => this._daemon.call('shelf', 'Remove', item.uri), {size: 10, accessibleName: 'Quitar de la bandeja'});
         remove.set_size(px(REMOVE_SIZE), px(REMOVE_SIZE));
 
         const tile = this._tileBox(this._frame(preview, {copied, remove}), item.name);

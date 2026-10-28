@@ -17,14 +17,14 @@ import {FilesView, SHELF_CAPACITY} from './files.js';
 import {Page} from './page.js';
 
 const TABS = [
-    {name: 'clipboard', label: 'Clipboard'},
-    {name: 'files', label: 'Files'},
+    {name: 'clipboard', label: 'Portapapeles'},
+    {name: 'files', label: 'Archivos'},
 ];
 const FILTERS = [
-    {kind: 'text', icon: 'isle-text', name: 'Text'},
-    {kind: 'link', icon: 'isle-link', name: 'Links'},
-    {kind: 'image', icon: 'isle-image', name: 'Images'},
-    {kind: 'files', icon: 'isle-file', name: 'Files'},
+    {kind: 'text', icon: 'isle-text', name: 'Texto'},
+    {kind: 'link', icon: 'isle-link', name: 'Enlaces'},
+    {kind: 'image', icon: 'isle-image', name: 'Imágenes'},
+    {kind: 'files', icon: 'isle-file', name: 'Archivos'},
 ];
 /** How long "Clear all" waits for its confirming click. */
 const CONFIRM_MS = 3000;
@@ -145,7 +145,7 @@ export const ShelfPage = GObject.registerClass({
             const button = new St.Button({
                 style_class: 'isle-segment',
                 child: new St.Icon({gicon: icon(filter.icon), icon_size: 13}),
-                accessible_name: `Only ${filter.name.toLowerCase()}`,
+                accessible_name: `Solo ${filter.name.toLowerCase()}`,
                 can_focus: true,
             });
             button.connect('clicked', () => this._setFilter(this._filter === filter.kind ? null : filter.kind));
@@ -154,7 +154,7 @@ export const ShelfPage = GObject.registerClass({
         }
         this._clipboardControls.add_child(filters);
 
-        this._search = new St.Entry({style_class: 'isle-entry isle-shelf-field', hint_text: 'Search', can_focus: true, x_expand: true});
+        this._search = new St.Entry({style_class: 'isle-entry isle-shelf-field', hint_text: 'Buscar', can_focus: true, x_expand: true});
         this._search.set_primary_icon(new St.Icon({gicon: icon('isle-search'), icon_size: 12, style_class: 'isle-shelf-field-icon'}));
         const text = this._search.clutter_text;
         // Ask for the keyboard before the field takes focus: the grab moves focus itself.
@@ -179,14 +179,14 @@ export const ShelfPage = GObject.registerClass({
         // Keeps the buttons at the end while the field is closed.
         this._searchSpacer = new St.Widget({x_expand: true});
         this._searchButton = iconButton('isle-search', 'isle-button-round isle-button-small',
-            () => this._openSearch(), {size: 13, accessibleName: 'Search the clipboard history'});
+            () => this._openSearch(), {size: 13, accessibleName: 'Buscar en el historial del portapapeles'});
         this._clipboardControls.add_child(this._searchSpacer);
         this._clipboardControls.add_child(this._search);
         this._clipboardControls.add_child(this._searchButton);
 
         this._clear = iconButton('isle-trash', 'isle-button-round isle-button-small', () => this._askToClear(),
-            {size: 14, accessibleName: 'Clear the clipboard history'});
-        this._confirm = pillButton('Clear all', 'isle-pill-small isle-shelf-confirm', () => this._clearHistory());
+            {size: 14, accessibleName: 'Borrar el historial del portapapeles'});
+        this._confirm = pillButton('Borrar todo', 'isle-pill-small isle-shelf-confirm', () => this._clearHistory());
         this._confirm.hide();
         this._clipboardControls.add_child(this._clear);
         this._clipboardControls.add_child(this._confirm);
@@ -395,19 +395,19 @@ export const ShelfPage = GObject.registerClass({
         if (count === 0 && !this._added)
             text = '';
         else if (refusal === 'local')
-            text = 'Only files on this computer';
+            text = 'Solo archivos de este equipo';
         else if (refusal && full)
-            text = 'Full · remove a file first';
+            text = 'Lleno · quita primero un archivo';
         else if (refusal)
-            text = `Only ${SHELF_CAPACITY - count} more fit`;
+            text = `Solo caben ${SHELF_CAPACITY - count} más`;
         else if (this._dropping)
-            text = this._dropOver ? 'Release to add it' : 'Drop to keep it on the shelf';
+            text = this._dropOver ? 'Suelta para añadirlo' : 'Suelta para guardarlo en la bandeja';
         else if (this._added)
-            text = 'Added · click to copy, or drag it into any app';
+            text = 'Añadido · haz clic para copiar, o arrástralo a cualquier app';
         else if (full)
-            text = 'Full · remove a file to add another';
+            text = 'Lleno · quita un archivo para añadir otro';
         else
-            text = `${count} of ${SHELF_CAPACITY} · click to copy, or drag into any app`;
+            text = `${count} de ${SHELF_CAPACITY} · haz clic para copiar, o arrastra a cualquier app`;
         this._filesHint.text = text;
         if (this._dropping || this._added)
             this._filesHint.add_style_class_name('active');
@@ -510,7 +510,7 @@ export const ShelfPage = GObject.registerClass({
             this.emit('request-close');
             this._history.paste();
         } else {
-            this._clips.flash(item, 'isle-check-symbolic', 'Copied');
+            this._clips.flash(item, 'isle-check-symbolic', 'Copiado');
             this._copied = [...this._copied.filter(id => id !== item.id), item.id];
         }
     }

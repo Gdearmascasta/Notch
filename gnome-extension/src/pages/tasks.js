@@ -114,11 +114,11 @@ class TasksPage extends Page {
     /** "Reminders", the count of open ones, and +. */
     _buildHeader() {
         const header = new St.BoxLayout({style_class: 'isle-reminders-header'});
-        header.add_child(label('Reminders', 'isle-reminders-title', {x_expand: true}));
+        header.add_child(label('Recordatorios', 'isle-reminders-title', {x_expand: true}));
         this._count = label('', 'isle-reminders-count');
         header.add_child(this._count);
         const add = iconButton('isle-plus-symbolic', 'isle-button-flat isle-reminders-add',
-            () => this._focusNew(), {size: 12, accessibleName: 'New reminder'});
+            () => this._focusNew(), {size: 12, accessibleName: 'Recordatorio nuevo'});
         // Its plus on the page's right edge; the padding hangs past it.
         onUiScale(add, scale => (add.translation_x = 5 * scale));
         header.add_child(add);
@@ -131,7 +131,7 @@ class TasksPage extends Page {
         const row = new St.BoxLayout({style_class: 'isle-reminder isle-reminder-new', y_expand: false});
         row.add_child(new St.Widget({style_class: 'isle-reminder-check faint', y_align: Clutter.ActorAlign.CENTER}));
         const column = new St.BoxLayout({...VERTICAL, x_expand: true, y_expand: true});
-        this._entry = new St.Entry({style_class: 'isle-reminder-field', hint_text: 'New reminder', can_focus: true, x_expand: true});
+        this._entry = new St.Entry({style_class: 'isle-reminder-field', hint_text: 'Recordatorio nuevo', can_focus: true, x_expand: true});
         const content = new St.BoxLayout({style_class: 'isle-reminder-content', y_expand: true});
         content.add_child(this._entry);
         column.add_child(content);
@@ -240,7 +240,7 @@ class TasksPage extends Page {
         }
         this._known = new Set(shown.map(task => task.id));
         this._empty.visible = shown.length === 0;
-        this._empty.text = tasks.length > shown.length ? 'All done' : 'No reminders';
+        this._empty.text = tasks.length > shown.length ? 'Todo hecho' : 'No hay recordatorios';
     }
 
     /** Opens `row` from nothing to its height, fading in, while the rows below make room. */
@@ -280,7 +280,7 @@ class TasksPage extends Page {
         const check = new St.Button({
             style_class: 'isle-reminder-check',
             child: dot,
-            accessible_name: 'Mark as done',
+            accessible_name: 'Marcar como hecho',
             y_align: Clutter.ActorAlign.START,
         });
         row.add_child(check);
@@ -315,7 +315,7 @@ class TasksPage extends Page {
                 removing = true;
                 this.daemon.call('todo', 'Remove', task.id);
             }
-        }, {size: 9, accessibleName: 'Delete reminder'});
+        }, {size: 9, accessibleName: 'Borrar recordatorio'});
         remove.opacity = 0;
         onHover(row, hovered => remove.ease({opacity: hovered ? 255 : 0, duration: 120}));
         content.add_child(remove);
@@ -347,7 +347,7 @@ class TasksPage extends Page {
             this.cancel(name);
             this._leaving.delete(task.id);
             check.remove_style_pseudo_class('checked');
-            check.accessible_name = 'Mark as done';
+            check.accessible_name = 'Marcar como hecho';
             title.remove_style_class_name('done');
             pop(false);
             strike.remove_transition('scale-x');
@@ -360,7 +360,7 @@ class TasksPage extends Page {
         const [textWidth] = title.clutter_text.get_layout().get_pixel_size();
         this._leaving.add(task.id);
         check.add_style_pseudo_class('checked');
-        check.accessible_name = 'Not done';
+        check.accessible_name = 'Sin hacer';
         // On the title alone: on the row it restyled every widget in it, in the click's frame.
         title.add_style_class_name('done');
         pop(true);

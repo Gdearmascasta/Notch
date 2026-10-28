@@ -155,7 +155,7 @@ export function iconButton(iconName, styleClass, onClick, {size = 16, accessible
 /** A small × over the top-left corner of an alert's icon, shown under the pointer (see `revealClose`), taking
  * no room. `out` (CSS px) sets it further out from the corner, for a round icon whose corner is empty. */
 export function cornerClose(onClick, {out = 8} = {}) {
-    const button = iconButton('isle-close-symbolic', 'isle-corner-close', onClick, {size: 8, accessibleName: 'Close'});
+    const button = iconButton('isle-close-symbolic', 'isle-corner-close', onClick, {size: 8, accessibleName: 'Cerrar'});
     // Always there, only faded out and untouchable: showing and hiding it would restyle the icon beside it.
     button.set({x_align: Clutter.ActorAlign.START, y_align: Clutter.ActorAlign.START, opacity: 0, reactive: false,
         can_focus: false});

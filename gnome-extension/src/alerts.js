@@ -34,25 +34,25 @@ function percentText(value) {
 
 // GNOME's OSD icons by prefix (first match wins): a title, and the state an icon-only toggle shows.
 const OSD_KINDS = [
-    ['audio-volume', 'Volume'],
-    ['microphone-sensitivity-muted', 'Microphone', 'Muted'],
-    ['microphone', 'Microphone'],
-    ['keyboard-brightness', 'Keyboard light'],
-    ['display-brightness', 'Brightness'],
-    ['touchpad-disabled', 'Touchpad', 'Off'],
-    ['input-touchpad', 'Touchpad', 'On'],
-    ['airplane-mode-disabled', 'Airplane mode', 'Off'],
-    ['airplane-mode', 'Airplane mode', 'On'],
-    ['camera-disabled', 'Camera', 'Off'],
-    ['camera', 'Camera', 'On'],
-    ['bluetooth-disabled', 'Bluetooth', 'Off'],
-    ['bluetooth', 'Bluetooth', 'On'],
-    ['network-wireless-disabled', 'Wi-Fi', 'Off'],
-    ['video-display', 'Display'],
+    ['audio-volume', 'Volumen'],
+    ['microphone-sensitivity-muted', 'Micrófono', 'Silenciado'],
+    ['microphone', 'Micrófono'],
+    ['keyboard-brightness', 'Luz del teclado'],
+    ['display-brightness', 'Brillo'],
+    ['touchpad-disabled', 'Touchpad', 'Desactivado'],
+    ['input-touchpad', 'Touchpad', 'Activado'],
+    ['airplane-mode-disabled', 'Modo avión', 'Desactivado'],
+    ['airplane-mode', 'Modo avión', 'Activado'],
+    ['camera-disabled', 'Cámara', 'Desactivado'],
+    ['camera', 'Cámara', 'Activado'],
+    ['bluetooth-disabled', 'Bluetooth', 'Desactivado'],
+    ['bluetooth', 'Bluetooth', 'Activado'],
+    ['network-wireless-disabled', 'Wi-Fi', 'Desactivado'],
+    ['video-display', 'Pantalla'],
 ];
 
 /** Where a level applies when GNOME names none, so every level alert has two lines, as Volume's "Speakers". */
-const OSD_PLACES = {'Brightness': 'Built-in Display', 'Keyboard light': 'Keyboard'};
+const OSD_PLACES = {'Brillo': 'Pantalla integrada', 'Luz del teclado': 'Teclado'};
 
 /** "touchpad-disabled-symbolic" → "Touchpad disabled", for OSDs not listed above. */
 function iconTitle(iconName) {
@@ -80,7 +80,7 @@ export function osd(gicon, text, level, maxLevel) {
         tone: 'neutral',
         duration: OSD_DURATION,
         // Volume: the speaker's waves follow the level (see VolumeGlyph).
-        volume: kind === 'Volume' ? {level: hasLevel ? fraction : 0, muted: iconName.includes('muted')} : undefined,
+        volume: kind === 'Volumen' ? {level: hasLevel ? fraction : 0, muted: iconName.includes('muted')} : undefined,
     };
 }
 
@@ -92,8 +92,8 @@ export function capsLock(on) {
         transient: true,
         icon: 'isle-capslock-symbolic',
         motion: on ? 'rise' : undefined,
-        title: 'Caps Lock',
-        status: on ? 'On' : 'Off',
+        title: 'Bloq Mayús',
+        status: on ? 'Activado' : 'Desactivado',
         tone: 'neutral',
         duration: OSD_DURATION,
     };
@@ -111,8 +111,8 @@ export function system(event) {
             motion: event.plugged ? 'pulse' : undefined,
             ringIconSize: event.plugged ? undefined : 14,
             ring: event.percent / 100,
-            title: event.plugged ? 'Charging' : 'On battery',
-            subtitle: event.plugged ? 'Charger connected' : 'Charger disconnected',
+            title: event.plugged ? 'Cargando' : 'Con batería',
+            subtitle: event.plugged ? 'Cargador conectado' : 'Cargador desconectado',
             value: percentText(event.percent),
             tone: event.plugged ? 'good' : event.percent <= 20 ? 'bad' : 'neutral',
             duration: STATUS_DURATION,
@@ -123,8 +123,8 @@ export function system(event) {
             icon: batteryIcon(event.percent),
             ringIconSize: 14,
             ring: event.percent / 100,
-            title: 'Low battery',
-            subtitle: 'Plug in your charger soon',
+            title: 'Batería baja',
+            subtitle: 'Conecta el cargador pronto',
             value: percentText(event.percent),
             tone: 'bad',
             duration: REMINDER_DURATION,
@@ -135,8 +135,8 @@ export function system(event) {
             icon: 'isle-bolt',
             motion: 'pulse',
             ring: 1,
-            title: 'Fully charged',
-            subtitle: 'You can unplug your charger',
+            title: 'Carga completa',
+            subtitle: 'Puedes desconectar el cargador',
             value: '100%',
             tone: 'good',
             duration: STATUS_DURATION,
@@ -149,8 +149,8 @@ export function system(event) {
         return {
             key: 'network',
             icon: 'network-wireless-offline-symbolic',
-            title: 'Offline',
-            subtitle: 'The network connection was lost',
+            title: 'Sin conexión',
+            subtitle: 'Se perdió la conexión de red',
             tone: 'bad',
             duration: STATUS_DURATION,
         };
@@ -162,7 +162,7 @@ export function system(event) {
             icon: device.icon.endsWith('-symbolic') ? device.icon : `${device.icon}-symbolic`,
             ring: battery !== null ? battery / 100 : null,
             title: device.name,
-            subtitle: event.connected ? 'Connected' : 'Disconnected',
+            subtitle: event.connected ? 'Conectado' : 'Desconectado',
             value: battery !== null ? percentText(battery) : null,
             tone: !event.connected ? 'neutral' : battery !== null && battery < 20 ? 'bad' : 'good',
             duration: STATUS_DURATION,
@@ -182,10 +182,10 @@ export function pomodoroFinished(finished, next, state, daemon) {
             key: 'pomodoro',
             icon: 'isle-timer-symbolic',
             motion: 'bounce',
-            title: 'Focus session done',
-            subtitle: waiting ? 'Take a break when you’re ready' : `Enjoy a ${minutes}-minute break`,
+            title: 'Sesión de concentración terminada',
+            subtitle: waiting ? 'Tómate un descanso cuando quieras' : `Disfruta de un descanso de ${minutes} minutos`,
             tone: 'good',
-            action: waiting ? {label: 'Start break', callback: () => daemon.call('pomodoro', 'Start')} : null,
+            action: waiting ? {label: 'Empezar descanso', callback: () => daemon.call('pomodoro', 'Start')} : null,
             duration: REMINDER_DURATION,
             page: 'focus',
         };
@@ -194,10 +194,10 @@ export function pomodoroFinished(finished, next, state, daemon) {
         key: 'pomodoro',
         icon: 'isle-timer-symbolic',
         motion: 'bounce',
-        title: next === 'focus' ? 'Break is over' : Format.phaseName(next),
-        subtitle: waiting ? 'Ready for another focus session?' : `${minutes} minutes of focus`,
+        title: next === 'focus' ? 'Se acabó el descanso' : Format.phaseName(next),
+        subtitle: waiting ? '¿Listo para otra sesión de concentración?' : `${minutes} minutes of focus`,
         tone: 'focus',
-        action: waiting ? {label: 'Start focus', callback: () => daemon.call('pomodoro', 'Start')} : null,
+        action: waiting ? {label: 'Empezar a concentrarse', callback: () => daemon.call('pomodoro', 'Start')} : null,
         duration: REMINDER_DURATION,
         page: 'focus',
     };
@@ -271,7 +271,7 @@ export function notification(item, urgent, {onShown, onWithdrawn}, shared = fals
     watchWithdrawal(item, () => onWithdrawn(key));
     const body = shared ? '' : plainBody(item).replace(/\s+/g, ' ').trim();
     // On one line, as the body.
-    const title = (shared ? item.source?.title || 'New notification' : item.title || item.source?.title || '')
+    const title = (shared ? item.source?.title || 'Notificación nueva' : item.title || item.source?.title || '')
         .replace(/\s+/g, ' ').trim();
     const buttons = shared ? [] : (item.actions ?? []).slice(0, MAX_NOTIFICATION_BUTTONS);
     const press = button => {
@@ -333,10 +333,10 @@ export function notification(item, urgent, {onShown, onWithdrawn}, shared = fals
 
 /** "5 hours" → "5-hour limit", "Week · Opus" → "weekly Opus limit". */
 function limitName(window) {
-    if (window === '5 hours')
+    if (window === '5 horas')
         return '5-hour limit';
     const [span, model] = window.split(' · ');
-    const kind = span === 'Week' ? 'Weekly' : span;
+    const kind = span === 'Semana' ? 'Semanal' : span;
     return model ? `${kind} ${model} limit` : `${kind} limit`;
 }
 
@@ -375,7 +375,7 @@ export function reminder({id, text}, onShown) {
         title: text,
         // Its words are the point: two lines, as a meeting's title.
         titleLines: 2,
-        subtitle: 'Reminder',
+        subtitle: 'Recordatorio',
         tone: 'neutral',
         duration: REMINDER_DURATION,
         // Its time only runs while someone is there to see it.
@@ -415,7 +415,7 @@ export function meeting(event, link, join) {
         duration: REMINDER_DURATION,
         // Its time only runs while someone is there to see it, as a reminder's.
         sticky: true,
-        action: link ? {label: 'Join', callback: join, primary: true} : null,
+        action: link ? {label: 'Unirse', callback: join, primary: true} : null,
         // When its turn comes: the minutes left then, and gone once the event is over (an hour without an end).
         fresh: () => {
             if (Date.now() >= (event.end_ms || event.start_ms + 3600e3))
@@ -438,12 +438,12 @@ const agentTone = provider => provider === 'codex' ? 'codex' : provider === 'gro
 
 /** An AI agent needs the user, or is done ({provider, kind, project, message}); `show` brings its window up. */
 export function agent(event, show) {
-    const name = AGENT_NAMES[event.provider] ?? 'Your AI';
+    const name = AGENT_NAMES[event.provider] ?? 'Tu IA';
     const waiting = event.kind === 'permission' || event.kind === 'waiting';
-    const title = {permission: `${name} needs your OK`, waiting: `${name} is waiting for you`}[event.kind] ?? `${name} is done`;
+    const title = {permission: `${name} necesita tu visto bueno`, waiting: `${name} te está esperando`}[event.kind] ?? `${name} is done`;
     // Said once: the title already says it needs an OK; the tool it asks for, as a question.
     const tool = /permission to use (.+?)\.?$/i.exec(event.message ?? '')?.[1];
-    const detail = {permission: tool ? `Allow ${tool}?` : '', waiting: ''}[event.kind] ?? event.message?.trim();
+    const detail = {permission: tool ? `¿Permitir ${tool}?` : '', waiting: ''}[event.kind] ?? event.message?.trim();
     return {
         // One per session: a newer word from the same one replaces it.
         key: `agent:${event.provider}:${event.session || event.project}`,
@@ -455,7 +455,7 @@ export function agent(event, show) {
         duration: waiting ? REMINDER_DURATION + 4000 : REMINDER_DURATION,
         // It waits on the user: it stays until they are there to see it.
         sticky: waiting,
-        action: show ? {label: 'Show', callback: show} : null,
+        action: show ? {label: 'Mostrar', callback: show} : null,
     };
 }
 
@@ -477,16 +477,16 @@ function toolLine(tool, input) {
  * `answer(choice)` sends allow, deny or always back. */
 export function agentAsks(request, look, answer) {
     const actions = [
-        {label: 'Deny', answer: 'deny', callback: () => answer('deny')},
-        {label: 'Allow', answer: 'allow', primary: !request.always, callback: () => answer('allow')},
+        {label: 'Denegar', answer: 'deny', callback: () => answer('deny')},
+        {label: 'Permitir', answer: 'allow', primary: !request.always, callback: () => answer('allow')},
     ];
     // Claude can keep a rule for next time; the alert says where it is kept.
     if (request.always)
-        actions.push({label: 'Always', answer: 'allow', primary: true, done: 'Always allowed here', callback: () => answer('always')});
+        actions.push({label: 'Siempre', answer: 'allow', primary: true, done: 'Siempre permitido aquí', callback: () => answer('always')});
     return {
         key: `agent-ask:${request.id}`,
         bot: {look, glyph: '!'},
-        title: `${request.project || AGENT_APPS[request.provider]} needs permission`,
+        title: `${request.project || AGENT_APPS[request.provider]} necesita permiso`,
         subtitle: request.project ? AGENT_APPS[request.provider] : '',
         code: toolLine(request.tool, request.input),
         tone: 'warn',
@@ -501,7 +501,7 @@ export function agentAsks(request, look, answer) {
 
 /** An AI agent finished ({provider, project, message: its last words}); `show` brings its window up. */
 export function agentDone(event, look, show) {
-    const summary = firstSentence(event.message) || 'Finished';
+    const summary = firstSentence(event.message) || 'Terminado';
     return {
         key: `agent:${event.provider}:${event.session || event.project}`,
         bot: {look, glyph: 'check', form: 'success'},
@@ -511,8 +511,8 @@ export function agentDone(event, look, show) {
         tone: 'good',
         glow: DONE_GLOW,
         actions: [
-            ...show ? [{label: 'Open terminal', callback: show}] : [],
-            {label: 'OK', primary: true, callback: () => {}},
+            ...show ? [{label: 'Abrir terminal', callback: show}] : [],
+            {label: 'Aceptar', primary: true, callback: () => {}},
         ],
         duration: REMINDER_DURATION,
     };
@@ -541,13 +541,13 @@ export function taskAsks(card, look, answer) {
         key: `task-ask:${card.id}`,
         bot: {look, glyph: '!'},
         title: card.why,
-        subtitle: card.risks?.includes('root') ? 'Isle wants to run this · asks for your password' : 'Isle wants to run this',
+        subtitle: card.risks?.includes('root') ? 'Isle quiere ejecutar esto · pide tu contraseña' : 'Isle quiere ejecutar esto',
         code: card.command,
         tone: 'warn',
         glow: look.palette.glow,
         actions: [
-            {label: 'Deny', answer: 'deny', callback: () => answer(false)},
-            {label: 'Run', answer: 'allow', primary: true, done: 'Running', callback: () => answer(true)},
+            {label: 'Denegar', answer: 'deny', callback: () => answer(false)},
+            {label: 'Ejecutar', answer: 'allow', primary: true, done: 'Ejecutando', callback: () => answer(true)},
         ],
         sticky: true,
         duration: 600000,
@@ -561,11 +561,11 @@ export function agentConnected(provider, look, settings) {
         key: `agent-connected:${provider}`,
         bot: {look, glyph: 'check', form: 'success'},
         title: `${AGENT_APPS[provider]} is connected`,
-        subtitle: provider === 'codex' ? 'Trust Isle’s hook once in Codex: /hooks' : 'Answer it from here when it asks',
+        subtitle: provider === 'codex' ? 'Confía en el hook de Isle una vez en Codex: /hooks' : 'Respóndele desde aquí cuando pregunte',
         tone: 'good',
         actions: [
-            {label: 'Settings', callback: settings},
-            {label: 'OK', primary: true, callback: () => {}},
+            {label: 'Ajustes', callback: settings},
+            {label: 'Aceptar', primary: true, callback: () => {}},
         ],
         duration: REMINDER_DURATION,
     };
@@ -573,7 +573,7 @@ export function agentConnected(provider, look, settings) {
 
 /** The model picked for the assistant isn't on `provider`'s plan now (it lapsed, say): `used` answers instead. */
 export function modelSwitched(provider, plan, picked, used) {
-    const name = {claude: 'Claude', codex: 'ChatGPT', grok: 'Grok', agy: 'Antigravity'}[provider] ?? 'Your AI';
+    const name = {claude: 'Claude', codex: 'ChatGPT', grok: 'Grok', agy: 'Antigravity'}[provider] ?? 'Tu IA';
     return {
         key: `model-switched:${provider}`,
         icon: {claude: 'isle-claude', codex: 'isle-openai', grok: 'isle-grok'}[provider] ?? 'isle-sparkle-symbolic',
@@ -581,7 +581,7 @@ export function modelSwitched(provider, plan, picked, used) {
         // A long model name ("Claude Opus 4.6 (Thinking)") wraps rather than being cut.
         titleLines: 2,
         // The pick comes back by itself once the plan allows it again.
-        subtitle: `Using ${used} for now`,
+        subtitle: `Usando ${used} por ahora`,
         tone: 'neutral',
         duration: REMINDER_DURATION,
     };
@@ -589,7 +589,7 @@ export function modelSwitched(provider, plan, picked, used) {
 
 /** The alerts from `provider` could not be turned on; `reason` is isled's. */
 export function agentRefused(provider, reason) {
-    const name = AGENT_NAMES[provider] ?? 'Your AI';
+    const name = AGENT_NAMES[provider] ?? 'Tu IA';
     return {
         key: `agent-refused:${provider}`,
         icon: agentIcon(provider),
@@ -608,9 +608,9 @@ export function update(version, open, packaged = false) {
         icon: 'software-update-available-symbolic',
         motion: 'bounce',
         title: `Isle ${version} is out`,
-        subtitle: packaged ? 'Update its package to get it' : 'Update in a click; your things stay',
+        subtitle: packaged ? 'Actualiza su paquete para tenerla' : 'Actualiza con un clic; tus cosas se conservan',
         tone: 'good',
-        action: {label: 'Update', callback: open},
+        action: {label: 'Actualizar', callback: open},
         duration: REMINDER_DURATION,
     };
 }
@@ -621,10 +621,10 @@ export function serviceDown(restart) {
         key: 'service-down',
         icon: 'dialog-warning-symbolic',
         motion: 'shake',
-        title: 'Isle’s service isn’t running',
-        subtitle: 'Music, timer and reminders need it',
+        title: 'El servicio de Isle no se está ejecutando',
+        subtitle: 'La música, el temporizador y los recordatorios lo necesitan',
         tone: 'bad',
-        action: {label: 'Restart', callback: restart},
+        action: {label: 'Reiniciar', callback: restart},
         duration: REMINDER_DURATION,
     };
 }
@@ -637,8 +637,8 @@ export function notificationsSummary(items) {
         items,
         icon: 'isle-bell',
         motion: 'bounce',
-        title: count === 1 ? '1 new notification' : `${count} new notifications`,
-        subtitle: count === 1 ? 'Open the island to read it' : 'Open the island to read them',
+        title: count === 1 ? '1 notificación nueva' : `${count} notificaciones nuevas`,
+        subtitle: count === 1 ? 'Abre la isla para leerla' : 'Abre la isla para leerlas',
         tone: 'neutral',
         duration: NOTIFICATION_DURATION,
         page: 'notifications',
@@ -657,7 +657,7 @@ export function notificationsSummary(items) {
  * shows it in full. */
 export function assistant(state, open) {
     const failed = state.phase === 'error';
-    const text = failed ? state.error || 'Something went wrong' : Format.answerPlain(state.reply ?? '') || 'Done';
+    const text = failed ? state.error || 'Algo salió mal' : Format.answerPlain(state.reply ?? '') || 'Hecho';
     return {
         key: 'assistant',
         icon: failed ? 'dialog-warning-symbolic' : 'isle-mic-symbolic',
@@ -665,8 +665,8 @@ export function assistant(state, open) {
         title: text,
         // An answer may take three lines, so a question at its end still shows.
         titleLines: 3,
-        subtitle: failed ? state.hint ?? '' : 'Isle Assistant',
-        cutSubtitle: failed ? undefined : 'Isle Assistant · Click to read more',
+        subtitle: failed ? state.hint ?? '' : 'Asistente de Isle',
+        cutSubtitle: failed ? undefined : 'Asistente de Isle · Haz clic para leer más',
         tone: failed ? 'bad' : 'good',
         // Long enough to read, as the open island gives it.
         duration: Math.min(ANSWER_MAX_DURATION, STATUS_DURATION + 45 * text.length),
@@ -680,10 +680,10 @@ export function recordingStarted(stop) {
         key: 'recording',
         icon: 'media-record-symbolic',
         motion: 'pulse',
-        title: 'Recording screen',
-        subtitle: 'Stop it from the red dot in the island',
+        title: 'Grabando la pantalla',
+        subtitle: 'Detenla desde el punto rojo de la isla',
         tone: 'bad',
-        action: {label: 'Stop', callback: stop},
+        action: {label: 'Detener', callback: stop},
         duration: STATUS_DURATION,
     };
 }

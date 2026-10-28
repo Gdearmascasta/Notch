@@ -144,7 +144,7 @@ export class CallMonitor extends Signals.EventEmitter {
 
     /** The call's service ("Google Meet") once its window named one, else its app's name. */
     get name() {
-        return this._service ?? this.app?.get_name() ?? this._streamName ?? 'Call';
+        return this._service ?? this.app?.get_name() ?? this._streamName ?? 'Llamada';
     }
 
     /** The call app's icon, or null when the app is unknown. */

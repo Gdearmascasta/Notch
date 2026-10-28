@@ -97,15 +97,15 @@ function ghost() {
 
 /** The shapes to pick from, in order; a squircle or a capsule weighs as much as the circle at a larger peak. */
 export const SHAPES = {
-    circle: {label: 'Circle', radii: new Float64Array(SAMPLES).fill(1)},
-    pebble: {label: 'Pebble', radii: normalize(ANGLES.map(a => 1 + 0.075 * Math.cos(2 * a + 0.5) + 0.035 * Math.cos(3 * a + 2.1)), 1.02)},
+    circle: {label: 'Círculo', radii: new Float64Array(SAMPLES).fill(1)},
+    pebble: {label: 'Guijarro', radii: normalize(ANGLES.map(a => 1 + 0.075 * Math.cos(2 * a + 0.5) + 0.035 * Math.cos(3 * a + 2.1)), 1.02)},
     squircle: {label: 'Squircle', radii: normalize(ANGLES.map((_, i) => (Math.abs(COS[i]) ** 4.2 + Math.abs(SIN[i]) ** 4.2) ** (-1 / 4.2)), 1.1)},
-    capsule: {label: 'Capsule', radii: normalize(fromPolygon(hullOfCircles(-0.42, 0, 0.62, 0.42, 0, 0.62)), 1.08)},
-    cloud: {label: 'Cloud', radii: normalize(unionOfCircles([{x: -0.44, y: 0.2, r: 0.54}, {x: 0.46, y: 0.2, r: 0.5},
+    capsule: {label: 'Cápsula', radii: normalize(fromPolygon(hullOfCircles(-0.42, 0, 0.62, 0.42, 0, 0.62)), 1.08)},
+    cloud: {label: 'Nube', radii: normalize(unionOfCircles([{x: -0.44, y: 0.2, r: 0.54}, {x: 0.46, y: 0.2, r: 0.5},
         {x: 0.02, y: 0.3, r: 0.6}, {x: -0.24, y: -0.3, r: 0.48}, {x: 0.3, y: -0.24, r: 0.44}]), 1.06)},
-    hexagon: {label: 'Hexagon', radii: normalize(fromPolygon(roundedPolygon(6, 1.04, 0.26)), 1.04)},
-    drop: {label: 'Drop', radii: normalize(fromPolygon(hullOfCircles(0, 0.28, 0.66, 0, -0.96, 0.05)), 1.06)},
-    ghost: {label: 'Ghost', radii: normalize(fromPolygon(ghost()), 1.04)},
+    hexagon: {label: 'Hexágono', radii: normalize(fromPolygon(roundedPolygon(6, 1.04, 0.26)), 1.04)},
+    drop: {label: 'Gota', radii: normalize(fromPolygon(hullOfCircles(0, 0.28, 0.66, 0, -0.96, 0.05)), 1.06)},
+    ghost: {label: 'Fantasma', radii: normalize(fromPolygon(ghost()), 1.04)},
 };
 /** Where the eyes sit on each shape (down, in body radii) and how big, so they stay well inside it. */
 const EYE_FIT = {cloud: {y: 0.1, size: 1}, drop: {y: 0.2, size: 0.9}, hexagon: {y: 0, size: 0.95}, ghost: {y: -0.06, size: 1}};
@@ -119,17 +119,17 @@ const luminance = ([r, g, b]) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
 
 /** Colours to pick from: the body, and the three colours the island glows with beside it. */
 export const COLORS = {
-    cloud: {label: 'Cloud', body: '#f5f5f8', glow: CLASSIC_GLOW},
-    ink: {label: 'Ink', body: '#2a2a33', glow: ['#7f8cff', '#b9c2ff', '#5fb4ff']},
-    peach: {label: 'Peach', body: '#ffb48f', glow: ['#ff7a59', '#ffb36b', '#ff8fa3']},
+    cloud: {label: 'Nube', body: '#f5f5f8', glow: CLASSIC_GLOW},
+    ink: {label: 'Tinta', body: '#2a2a33', glow: ['#7f8cff', '#b9c2ff', '#5fb4ff']},
+    peach: {label: 'Durazno', body: '#ffb48f', glow: ['#ff7a59', '#ffb36b', '#ff8fa3']},
     coral: {label: 'Coral', body: '#ff6f61', glow: ['#ff4d6d', '#ff7a45', '#ffb347']},
-    amber: {label: 'Amber', body: '#ffc94a', glow: ['#ff9f0a', '#ffd60a', '#ff7a2f']},
-    mint: {label: 'Mint', body: '#63e2ad', glow: ['#30d158', '#5fe0c0', '#b4f05a']},
-    teal: {label: 'Teal', body: '#2fc6b8', glow: ['#30c8d8', '#30d1a0', '#4f9dff']},
-    sky: {label: 'Sky', body: '#5eaaff', glow: ['#4f7dff', '#3fb6ff', '#6fe3ff']},
-    lavender: {label: 'Lavender', body: '#ab8eff', glow: ['#8f66ff', '#c77dff', '#5e7bff']},
-    rose: {label: 'Rose', body: '#ff80b8', glow: ['#ff5fa2', '#c86bff', '#ff8a7a']},
-    graphite: {label: 'Graphite', body: '#8f909c', glow: ['#a0a8c0', '#d6dae6', '#7d8bb0']},
+    amber: {label: 'Ámbar', body: '#ffc94a', glow: ['#ff9f0a', '#ffd60a', '#ff7a2f']},
+    mint: {label: 'Menta', body: '#63e2ad', glow: ['#30d158', '#5fe0c0', '#b4f05a']},
+    teal: {label: 'Verde azulado', body: '#2fc6b8', glow: ['#30c8d8', '#30d1a0', '#4f9dff']},
+    sky: {label: 'Cielo', body: '#5eaaff', glow: ['#4f7dff', '#3fb6ff', '#6fe3ff']},
+    lavender: {label: 'Lavanda', body: '#ab8eff', glow: ['#8f66ff', '#c77dff', '#5e7bff']},
+    rose: {label: 'Rosa', body: '#ff80b8', glow: ['#ff5fa2', '#c86bff', '#ff8a7a']},
+    graphite: {label: 'Grafito', body: '#8f909c', glow: ['#a0a8c0', '#d6dae6', '#7d8bb0']},
 };
 
 /** A glow colour as RGB, whether written in hex or already a triple. */

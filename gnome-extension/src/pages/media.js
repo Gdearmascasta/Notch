@@ -90,6 +90,12 @@ class MediaPage extends Page {
         return this._shown('lyrics') ? this._tint : null;
     }
 
+    /** The cover's colour while a song plays, for the closed island to take; null otherwise. */
+    get coverTint() {
+        const {nowPlaying} = this.daemon.state;
+        return !this.hidden && nowPlaying?.status === 'Playing' && Playback.hasTrack(nowPlaying) ? this._tint ?? null : null;
+    }
+
     /** Whether `mode` is on screen (the special modes need a track). */
     _shown(mode) {
         return this._mode === mode && Playback.hasTrack(this.daemon.state.nowPlaying);
@@ -173,11 +179,11 @@ class MediaPage extends Page {
     _transport() {
         const row = new St.BoxLayout({style_class: 'isle-transport', y_align: Clutter.ActorAlign.CENTER});
         const play = iconButton('isle-play-symbolic', 'isle-button-flat isle-play',
-            () => this.daemon.call('media', 'PlayPause'), {size: 22, accessibleName: 'Play or pause'});
+            () => this.daemon.call('media', 'PlayPause'), {size: 22, accessibleName: 'Reproducir o pausar'});
         const previous = iconButton('isle-backward-symbolic', 'isle-button-flat',
-            () => this.daemon.call('media', 'Previous'), {size: 18, accessibleName: 'Previous'});
+            () => this.daemon.call('media', 'Previous'), {size: 18, accessibleName: 'Anterior'});
         const next = iconButton('isle-forward-symbolic', 'isle-button-flat',
-            () => this.daemon.call('media', 'Next'), {size: 18, accessibleName: 'Next'});
+            () => this.daemon.call('media', 'Next'), {size: 18, accessibleName: 'Siguiente'});
         for (const button of [previous, play, next])
             row.add_child(button);
         this._playButtons.push(play);
@@ -214,8 +220,8 @@ class MediaPage extends Page {
                 this.daemon.call('media', 'Choose', this._nextPlayer.name);
         });
         modes.add_child(this._playerSwitch);
-        modes.add_child(this._modeButton('lyrics', 'isle-lyrics', 'Show lyrics', false));
-        modes.add_child(this._modeButton('audio', 'isle-output', 'Volume and output', false));
+        modes.add_child(this._modeButton('lyrics', 'isle-lyrics', 'Mostrar la letra', false));
+        modes.add_child(this._modeButton('audio', 'isle-output', 'Volumen y salida', false));
         // The last icon on the page's right edge, as the header's settings; its padding hangs past it.
         onUiScale(modes, scale => (modes.translation_x = 5 * scale));
         head.add_child(modes);
@@ -245,11 +251,11 @@ class MediaPage extends Page {
         side.add_child(this._progress());
 
         const controls = new St.BoxLayout({style_class: 'isle-lyrics-controls'});
-        controls.add_child(this._modeButton('lyrics', 'isle-lyrics', 'Hide lyrics', true));
+        controls.add_child(this._modeButton('lyrics', 'isle-lyrics', 'Ocultar la letra', true));
         const transport = this._transport();
         transport.set({x_expand: true, x_align: Clutter.ActorAlign.CENTER});
         controls.add_child(transport);
-        controls.add_child(this._modeButton('audio', 'isle-output', 'Volume and output', false));
+        controls.add_child(this._modeButton('audio', 'isle-output', 'Volumen y salida', false));
         side.add_child(controls);
 
         this._lyricsPane = new LyricsPane(this);
@@ -264,7 +270,7 @@ class MediaPage extends Page {
 
         const volume = new St.BoxLayout({style_class: 'isle-volume-row'});
         this._muteButton = iconButton('audio-volume-high-symbolic', 'isle-button-flat',
-            () => this._audio.toggleMuted(), {size: 18, accessibleName: 'Mute'});
+            () => this._audio.toggleMuted(), {size: 18, accessibleName: 'Silenciar'});
         this._volumeSlider = new Slider({scrollStep: 0.05});
         this._volumeSlider.connect('value-changed', (_slider, value) => {
             // Over 100% (boosted in Settings) the slider stays full: its end leaves the boost be.
@@ -276,7 +282,7 @@ class MediaPage extends Page {
         volume.add_child(this._muteButton);
         volume.add_child(this._volumeSlider);
         volume.add_child(this._volumeText);
-        volume.add_child(this._modeButton('audio', 'isle-output', 'Back to the player', true));
+        volume.add_child(this._modeButton('audio', 'isle-output', 'Volver al reproductor', true));
         layout.add_child(volume);
 
         this._outputList = new St.BoxLayout({...VERTICAL, style_class: 'isle-output-list'});
@@ -301,8 +307,8 @@ class MediaPage extends Page {
             y_align: Clutter.ActorAlign.CENTER,
         });
         box.add_child(new St.Icon({gicon: icon('isle-music'), icon_size: 28, style_class: 'isle-empty-icon'}));
-        box.add_child(label('Nothing playing', 'isle-empty-title', {x_align: Clutter.ActorAlign.CENTER}));
-        box.add_child(label('Play something in Spotify or on YouTube', 'isle-empty-hint', {x_align: Clutter.ActorAlign.CENTER}));
+        box.add_child(label('No se reproduce nada', 'isle-empty-title', {x_align: Clutter.ActorAlign.CENTER}));
+        box.add_child(label('Reproduce algo en Spotify o en YouTube', 'isle-empty-hint', {x_align: Clutter.ActorAlign.CENTER}));
         return box;
     }
 
@@ -342,6 +348,11 @@ class MediaPage extends Page {
         // Left out in Settings: no covers loaded or tinted for a page that can't be shown.
         if (this.hidden)
             return;
+        const coverTint = this.coverTint;
+        if (coverTint !== this._coverTintShown) {
+            this._coverTintShown = coverTint;
+            this.emit('tint-changed');
+        }
         const {nowPlaying} = this.daemon.state;
         if (!this._syncMode())
             return;
@@ -389,7 +400,7 @@ class MediaPage extends Page {
         if (!this._nextPlayer)
             return;
         this._playerIcon.gicon = Playback.playerApp(this._nextPlayer)?.get_icon() ?? icon('isle-music');
-        this._playerSwitch.accessible_name = `Switch to ${this._nextPlayer.identity}`;
+        this._playerSwitch.accessible_name = `Cambiar a ${this._nextPlayer.identity}`;
     }
 
     /** Which app plays it, unless the cover already is that app's logo. */
@@ -407,7 +418,7 @@ class MediaPage extends Page {
         const audio = this._audio;
         setButtonIcon(this._muteButton, audio.iconName);
         this._volumeSlider.value = audio.muted ? 0 : audio.volume;
-        this._volumeText.text = audio.muted ? 'Muted' : `${Math.round(audio.volume * 100)}%`;
+        this._volumeText.text = audio.muted ? 'Silenciado' : `${Math.round(audio.volume * 100)}%`;
     }
 
     /** One row per output, the current one checked; a click switches to it. */
@@ -458,8 +469,8 @@ class MediaPage extends Page {
             if (key !== this._tintPath || this._destroyed)
                 return;
             this._tint = vividColorOfFile(cover ?? path);
-            if (this._shown('lyrics'))
-                this.emit('tint-changed');
+            this._coverTintShown = this.coverTint;
+            this.emit('tint-changed');
         });
     }
 

@@ -82,5 +82,5 @@ export function dayText(timezone, now = GLib.DateTime.new_now_local()) {
     // A day number that orders dates across years.
     const key = d => d.get_year() * 400 + d.get_day_of_year();
     const diff = key(there) - key(now);
-    return diff > 0 ? 'Tomorrow' : diff < 0 ? 'Yesterday' : '';
+    return diff > 0 ? 'Mañana' : diff < 0 ? 'Ayer' : '';
 }

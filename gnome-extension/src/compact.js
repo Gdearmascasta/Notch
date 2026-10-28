@@ -93,10 +93,10 @@ export const CompactView = GObject.registerClass({
         center.add_child(centerRow);
 
         this._right = new St.Bin({style_class: 'isle-compact-slot', x_expand: false, y_align: Clutter.ActorAlign.CENTER});
-        this._bars = new Bars({height: 16});
+        this._bars = new Bars({height: 18});
         // A second activity on the right, its time as large as the clock and level with it: the timer's
         // time left (beside the song's bars while one plays), or a call's phone and length.
-        this._secondBars = new Bars({height: 16});
+        this._secondBars = new Bars({height: 18});
         this._secondTimer = this._secondPart(this._secondBars, 'isle-compact-second');
         this._secondPhone = new St.Icon({gicon: icon('isle-phone-symbolic'), icon_size: 15, y_align: Clutter.ActorAlign.CENTER});
         this._secondCall = this._secondPart(this._secondPhone, 'isle-compact-second isle-compact-second-call');

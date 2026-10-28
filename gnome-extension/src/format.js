@@ -81,10 +81,10 @@ export function hoursMinutes(ms) {
 /** Human name for a pomodoro phase. */
 export function phaseName(phase) {
     return {
-        idle: 'Ready to focus',
-        focus: 'Focus',
-        short_break: 'Short break',
-        long_break: 'Long break',
+        idle: 'Listo para concentrarse',
+        focus: 'Concentración',
+        short_break: 'Descanso corto',
+        long_break: 'Descanso largo',
     }[phase] ?? phase;
 }
 

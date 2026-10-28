@@ -76,12 +76,12 @@ class NotificationsPage extends Page {
     /** How many there are, then Do Not Disturb and Clear All as small round buttons. */
     _buildBar() {
         const bar = new St.BoxLayout({style_class: 'isle-notifications-bar'});
-        bar.add_child(label('Notifications', 'isle-notifications-heading', {x_expand: true, y_align: Clutter.ActorAlign.CENTER}));
+        bar.add_child(label('Notificaciones', 'isle-notifications-heading', {x_expand: true, y_align: Clutter.ActorAlign.CENTER}));
         this._dndButton = iconButton('isle-bell', 'isle-button-flat isle-dnd-toggle', () => {
             this._center.dnd = !this._center.dnd;
-        }, {size: 13, accessibleName: 'Do Not Disturb'});
+        }, {size: 13, accessibleName: 'No molestar'});
         this._dndButton.y_align = Clutter.ActorAlign.CENTER;
-        this._clearButton = pillButton('Clear', 'isle-pill-small isle-notifications-clear', () => this._center.clearAll());
+        this._clearButton = pillButton('Borrar', 'isle-pill-small isle-notifications-clear', () => this._center.clearAll());
         this._clearButton.y_align = Clutter.ActorAlign.CENTER;
         bar.add_child(this._dndButton);
         bar.add_child(this._clearButton);
@@ -93,7 +93,7 @@ class NotificationsPage extends Page {
         this._dndNote = new St.BoxLayout({style_class: 'isle-notifications-dnd-note', visible: false});
         // Dimmed as the line beside it: the moon is drawn white, so its colour can't be set.
         this._dndNote.add_child(new St.Icon({gicon: icon('isle-moon'), icon_size: 10, opacity: 130, y_align: Clutter.ActorAlign.CENTER}));
-        const text = label('Do Not Disturb: new ones wait here; urgent ones still show', 'isle-notifications-dnd-text',
+        const text = label('No molestar: las nuevas esperan aquí; las urgentes se siguen mostrando', 'isle-notifications-dnd-text',
             {x_expand: true, y_align: Clutter.ActorAlign.CENTER});
         text.clutter_text.ellipsize = Pango.EllipsizeMode.END;
         this._dndNote.add_child(text);
@@ -115,8 +115,8 @@ class NotificationsPage extends Page {
 
         this._empty = new St.BoxLayout({...VERTICAL, style_class: 'isle-empty', x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER, x_expand: true});
         this._empty.add_child(new St.Icon({gicon: icon('isle-bell'), icon_size: 24, style_class: 'isle-empty-icon', x_align: Clutter.ActorAlign.CENTER}));
-        this._empty.add_child(label('No notifications', 'isle-empty-title', {x_align: Clutter.ActorAlign.CENTER}));
-        this._empty.add_child(label('You’re all caught up', 'isle-empty-hint', {x_align: Clutter.ActorAlign.CENTER}));
+        this._empty.add_child(label('No hay notificaciones', 'isle-empty-title', {x_align: Clutter.ActorAlign.CENTER}));
+        this._empty.add_child(label('Estás al día', 'isle-empty-hint', {x_align: Clutter.ActorAlign.CENTER}));
 
         const column = new St.Widget({layout_manager: new Clutter.BinLayout(), x_expand: true, y_expand: true});
         column.add_child(this._scroll);
@@ -199,7 +199,7 @@ class NotificationsPage extends Page {
         }
         if (!notification.resident) {
             const dismiss = iconButton('isle-close-symbolic', 'isle-button-flat isle-notification-dismiss',
-                () => notification.destroy(), {size: 10, accessibleName: 'Dismiss'});
+                () => notification.destroy(), {size: 10, accessibleName: 'Descartar'});
             dismiss.y_align = Clutter.ActorAlign.CENTER;
             tools.add_child(dismiss);
         }

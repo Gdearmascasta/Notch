@@ -207,7 +207,7 @@ class CallPage extends Page {
             child: this._preview,
             can_focus: true,
             track_hover: true,
-            accessible_name: 'Go to the call',
+            accessible_name: 'Ir a la llamada',
             y_align: Clutter.ActorAlign.CENTER,
         });
         this._previewButton.connect('clicked', () => this._open());
@@ -233,8 +233,8 @@ class CallPage extends Page {
         side.add_child(status);
 
         const controls = new St.BoxLayout({style_class: 'isle-call-controls'});
-        this._mute = this._control('isle-mic-symbolic', 'Mute', () => call.toggleMuted());
-        this._show = this._control('isle-open-symbolic', 'Open', () => this._open());
+        this._mute = this._control('isle-mic-symbolic', 'Silenciar', () => call.toggleMuted());
+        this._show = this._control('isle-open-symbolic', 'Abrir', () => this._open());
         controls.add_child(this._mute.box);
         controls.add_child(this._show.box);
         side.add_child(controls);
@@ -293,7 +293,7 @@ class CallPage extends Page {
         const gicon = call.gicon ?? icon('isle-phone-symbolic');
         this._appIcon.gicon = gicon;
         this._name.text = call.name;
-        this._kind.text = call.video ? 'Video call' : 'Voice call';
+        this._kind.text = call.video ? 'Videollamada' : 'Llamada de voz';
 
         const muted = call.muted;
         this._mute.button.child.gicon = icon(muted ? 'isle-mic-off-symbolic' : 'isle-mic-symbolic');
@@ -301,8 +301,8 @@ class CallPage extends Page {
             this._mute.button.add_style_pseudo_class('checked');
         else
             this._mute.button.remove_style_pseudo_class('checked');
-        this._mute.text.text = muted ? 'Muted' : 'Mute';
-        this._mute.button.accessible_name = muted ? 'Unmute the microphone' : 'Mute the microphone';
+        this._mute.text.text = muted ? 'Silenciado' : 'Silenciar';
+        this._mute.button.accessible_name = muted ? 'Activar el micrófono' : 'Silenciar el micrófono';
 
         const reachable = Boolean(call.window || call.app);
         setEnabled(this._show.button, reachable);
@@ -318,7 +318,7 @@ class CallPage extends Page {
             return {};
         // Whoever watches the shared or recorded screen should not see the call.
         if (this._privacy.screenShare || this._privacy.recording)
-            return {hint: 'Hidden while sharing'};
+            return {hint: 'Oculto mientras compartes'};
         return {window};
     }
 

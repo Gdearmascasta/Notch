@@ -377,6 +377,8 @@ export class Controller {
                 this._render();
         });
         expanded.connect('tint-changed', () => this._syncTint());
+        // The closed island takes the playing song's cover colour, so the music page tells it of a new one.
+        expanded.pageNamed('music')?.connect('tint-changed', () => this._syncTint());
         expanded.connect('tint-motion', (_view, time, level) => {
             if (this._presentation === 'expanded')
                 this._island.setTintMotion(time, level);
@@ -561,7 +563,7 @@ export class Controller {
         this._voice.connect('stop', () => {
             // A command card still waiting goes with the request: it is never asked again in an alert.
             this._deciding?.done(false);
-            this._daemon.call('assistant', 'Cancel');
+            this._daemon.call('assistant', 'Cancelar');
             this.collapse();
             // Stopped, not left to carry on.
             this._voiceInBackground = false;
@@ -912,6 +914,7 @@ export class Controller {
         view.set_size(size.width, size.height);
         if (this._onBar)
             this._topBar.reserveWidth(this._compact.preferredWidth);
+        this._island.solid = view !== this._compact;
         this._island.morph(size, view);
         this._expanded.setActive(presentation === 'expanded');
         this._voice.setActive(presentation === 'voice');
@@ -1018,8 +1021,9 @@ export class Controller {
         const voice = this._presentation === 'voice';
         // An alert that asks or tells what an agent did glows in its colours, still: drawn once.
         const glow = this._presentation === 'peek' ? this._alert?.glow : null;
-        const tint = voice ? this._botLook.palette.glow : glow ?? (expanded ? this._expanded.tint : null);
-        const style = voice || glow ? 'aura' : expanded ? this._expanded.tintStyle : null;
+        const cover = this._presentation === 'compact' ? this._expanded.pageNamed('music')?.coverTint ?? null : null;
+        const tint = voice ? this._botLook.palette.glow : glow ?? (expanded ? this._expanded.tint : cover);
+        const style = voice || glow ? 'aura' : expanded ? this._expanded.tintStyle : cover ? 'wash' : null;
         if (glow && tint !== this._tint)
             this._island.setTintMotion(ALERT_GLOW_TIME, ALERT_GLOW_LEVEL);
         if (tint !== this._tint || style !== this._tintStyle) {
@@ -1703,7 +1707,7 @@ export class Controller {
             this._closedListeningAt = 0;
             if (this._voiceInBackground) {
                 this._deciding?.done(false);
-                this._daemon.call('assistant', 'Cancel');
+                this._daemon.call('assistant', 'Cancelar');
                 this._voiceInBackground = false;
                 this._syncAssistantBusy();
             }
@@ -1790,7 +1794,7 @@ export class Controller {
             return;
         this._voiceByHover = false;
         if (this._listenSent || this._daemon.state.assistant?.phase === 'listening')
-            this._daemon.call('assistant', 'Cancel');
+            this._daemon.call('assistant', 'Cancelar');
         this._listenSent = false;
         this._listenRequest++;
         this._cancel('voice-close');
@@ -1836,7 +1840,7 @@ export class Controller {
             this._syncAssistantBusy();
             return;
         }
-        const why = error || (this._daemon.running ? 'Isle couldn’t take that' : 'Isle’s service isn’t running');
+        const why = error || (this._daemon.running ? 'Isle no pudo procesar eso' : 'El servicio de Isle no se está ejecutando');
         this._listenSent = false;
         this._voice.setState({phase: 'error', error: why, hint: this._askAgainHint});
         this._setKeyboard(false);
@@ -1892,7 +1896,7 @@ export class Controller {
 
     /** How to ask again, under an error: the shortcut, if there is one. */
     get _askAgainHint() {
-        return this._voiceShortcut ? `Press ${this._voiceShortcut} to ask again.` : 'Ask again from the mic in the island.';
+        return this._voiceShortcut ? `Pulsa ${this._voiceShortcut} para volver a preguntar.` : 'Vuelve a preguntar desde el micrófono de la isla.';
     }
 
     /** Whether the assistant works on a request with the island closed. */
@@ -1963,7 +1967,7 @@ export class Controller {
                 this._voiceTurn = state.turn ?? 0;
                 this._voiceStep = state.step ?? 0;
                 if (state.phase === 'acting') {
-                    const detail = 'Isle was restarted (the screen locked) while this ran; it may not have happened';
+                    const detail = 'Isle se reinició (se bloqueó la pantalla) mientras esto se ejecutaba; puede que no se haya hecho';
                     this._daemon.call('assistant', 'Results', state.step,
                         JSON.stringify((state.actions ?? []).map(action => ({type: action.type, ok: false, detail}))));
                 }
@@ -2190,13 +2194,13 @@ export class Controller {
         if (this._voiceInBackground) {
             this._voiceInBackground = false;
             this._syncAssistantBusy();
-            this._post(Alerts.assistant({phase: 'error', error: 'Isle restarted', hint: this._askAgainHint},
+            this._post(Alerts.assistant({phase: 'error', error: 'Isle se reinició', hint: this._askAgainHint},
                 () => this._openVoice()));
             return;
         }
         if (!this._voiceOpen || !['listening', ...VOICE_WORKING].includes(this._voice.phase))
             return;
-        this._voice.setState({phase: 'error', error: 'Isle restarted', hint: this._askAgainHint});
+        this._voice.setState({phase: 'error', error: 'Isle se reinició', hint: this._askAgainHint});
         this._setKeyboard(false);
         this._render();
         this._scheduleVoiceClose(VOICE_ERROR_MS);

@@ -272,7 +272,7 @@ class UsagePage extends Page {
 
     /** Brings "Updated 14:32" and "resets in 12m" up to date. */
     _retime(provider) {
-        const fromCodex = provider.note?.startsWith('As of');
+        const fromCodex = provider.note?.startsWith('A fecha de');
         if (!provider.note || fromCodex)
             this._stamp.text = updated(provider.updated_ms, fromCodex);
         this._resetLabels.forEach(([reset, ms]) => (reset.text = resets(ms)));
@@ -289,7 +289,7 @@ class UsagePage extends Page {
         head.add_child(label(provider.name, 'isle-usage-name'));
         if (provider.plan)
             head.add_child(label(provider.plan, 'isle-usage-plan'));
-        const fromCodex = provider.note?.startsWith('As of');
+        const fromCodex = provider.note?.startsWith('A fecha de');
         const warning = provider.note && !fromCodex;
         const stamp = label(warning ? provider.note : updated(provider.updated_ms, fromCodex),
             `isle-usage-stamp${warning ? ' warning' : ''}`, {x_expand: true, x_align: Clutter.ActorAlign.END});
@@ -302,7 +302,7 @@ class UsagePage extends Page {
         for (const window of provider.windows.slice(0, 3))
             limits.add_child(this._limit(window, accent));
         if (provider.windows.length === 0)
-            limits.add_child(label(provider.empty || 'No limits reported yet', 'isle-usage-empty'));
+            limits.add_child(label(provider.empty || 'Aún no se han informado límites', 'isle-usage-empty'));
         content.add_child(limits);
         return content;
     }
@@ -337,14 +337,14 @@ class UsagePage extends Page {
 function resets(ms) {
     const minutes = Math.max(0, Math.round((ms - Date.now()) / 60000));
     if (minutes < 1)
-        return 'resets soon';
+        return 'se reinicia pronto';
     const days = Math.floor(minutes / 1440);
     const hours = Math.floor((minutes % 1440) / 60);
     if (days > 0)
-        return hours ? `resets in ${days}d ${hours}h` : `resets in ${days}d`;
+        return hours ? `se reinicia en ${days} d ${hours} h` : `se reinicia en ${days} d`;
     if (hours > 0)
-        return minutes % 60 ? `resets in ${hours}h ${minutes % 60}m` : `resets in ${hours}h`;
-    return `resets in ${minutes}m`;
+        return minutes % 60 ? `se reinicia en ${hours} h ${minutes % 60} min` : `se reinicia en ${hours} h`;
+    return `se reinicia en ${minutes} min`;
 }
 
 /** "Updated 14:32", or "From Codex, 14:32" for numbers as of Codex's last use; on another day, with its name. */
@@ -354,5 +354,5 @@ function updated(ms, fromCodex) {
     const at = GLib.DateTime.new_from_unix_local(Math.floor(ms / 1000));
     const today = GLib.DateTime.new_now_local().format('%F') === at.format('%F');
     const when = today ? Format.timeOfDay(at) : `${at.format('%a')} ${Format.timeOfDay(at)}`;
-    return fromCodex ? `From Codex, ${when}` : `Updated ${when}`;
+    return fromCodex ? `De Codex, ${when}` : `Actualizado ${when}`;
 }

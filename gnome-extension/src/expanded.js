@@ -26,14 +26,14 @@ export const BOTTOM_PADDING = 14;
 
 /** Each page's tab: its icon, and the label shown while it is open. */
 const TABS = {
-    call: {icon: 'isle-phone-symbolic', label: 'Call'},
-    music: {icon: 'isle-music', label: 'Music'},
-    notifications: {icon: 'isle-bell', label: 'Notifications'},
-    focus: {icon: 'isle-timer', label: 'Focus'},
-    reminders: {icon: 'isle-tasks', label: 'Reminders'},
-    shelf: {icon: 'isle-shelf', label: 'Shelf'},
-    calendar: {icon: 'isle-calendar', label: 'Calendar'},
-    usage: {icon: 'isle-gauge', label: 'Usage'},
+    call: {icon: 'isle-phone-symbolic', label: 'Llamada'},
+    music: {icon: 'isle-music', label: 'Música'},
+    notifications: {icon: 'isle-bell', label: 'Notificaciones'},
+    focus: {icon: 'isle-timer', label: 'Concentración'},
+    reminders: {icon: 'isle-tasks', label: 'Recordatorios'},
+    shelf: {icon: 'isle-shelf', label: 'Bandeja'},
+    calendar: {icon: 'isle-calendar', label: 'Calendario'},
+    usage: {icon: 'isle-gauge', label: 'Uso'},
 };
 /** How bright a tab's icon is: open, under the pointer, otherwise. */
 const TAB_OPACITY = {open: 255, hover: 230, idle: 140};
@@ -158,7 +158,7 @@ export const ExpandedView = GObject.registerClass({
         this._recordingButton = new St.Button({
             style_class: 'isle-recording-pill',
             child: recordingBox,
-            accessible_name: 'Stop recording',
+            accessible_name: 'Detener la grabación',
             visible: false,
             y_align: Clutter.ActorAlign.CENTER,
         });
@@ -170,7 +170,7 @@ export const ExpandedView = GObject.registerClass({
         status.add_child(this._headerBars);
         // The assistant, as AI rather than a microphone: it listens, and it can be typed to.
         this._micButton = iconButton('isle-sparkle-symbolic', 'isle-button-flat isle-header-mic',
-            () => this.emit('voice-requested'), {size: 15, accessibleName: 'AI assistant'});
+            () => this.emit('voice-requested'), {size: 15, accessibleName: 'Asistente de IA'});
         status.add_child(this._micButton);
 
         const clock = new St.BoxLayout({y_align: Clutter.ActorAlign.CENTER, style_class: 'isle-header-clock'});
@@ -182,7 +182,7 @@ export const ExpandedView = GObject.registerClass({
         clock.add_child(this._time);
         status.add_child(clock);
         const settings = iconButton('isle-settings', 'isle-button-flat isle-header-settings',
-            () => this.emit('settings-requested'), {size: 15, accessibleName: 'Settings'});
+            () => this.emit('settings-requested'), {size: 15, accessibleName: 'Ajustes'});
         // Its icon is an image, which takes no CSS colour: dimmed as the sparkle beside it, lit under the pointer.
         settings.child.opacity = SETTINGS_OPACITY;
         settings.connect('notify::hover', () => settings.child.ease({opacity: settings.hover ? 255 : SETTINGS_OPACITY, duration: 120}));

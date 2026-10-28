@@ -25,15 +25,15 @@ const TIME_GAP_MS = 5 * 60000;
 const BUBBLE_MAX = 420;
 /** What a risk badge says, and its icon (see `risksOf` in isled). */
 const RISKS = {
-    removes: ['isle-trash', 'Removes files or apps'],
-    internet: ['isle-link', 'Runs a script from the web'],
-    root: ['isle-lock-symbolic', 'Needs your password'],
+    removes: ['isle-trash', 'Quita archivos o apps'],
+    internet: ['isle-link', 'Ejecuta un script de la web'],
+    root: ['isle-lock-symbolic', 'Necesita tu contraseña'],
 };
 const STATUS = {
-    done: ['isle-check-symbolic', 'Done', 'isle-card-done'],
-    failed: ['isle-close-symbolic', 'Failed', 'isle-card-failed'],
-    denied: ['isle-close-symbolic', 'Denied', 'isle-card-denied'],
-    stopped: ['isle-stop-symbolic', 'Stopped', 'isle-card-denied'],
+    done: ['isle-check-symbolic', 'Hecho', 'isle-card-done'],
+    failed: ['isle-close-symbolic', 'Falló', 'isle-card-failed'],
+    denied: ['isle-close-symbolic', 'Denegado', 'isle-card-denied'],
+    stopped: ['isle-stop-symbolic', 'Detenido', 'isle-card-denied'],
 };
 
 // A label in one call.
@@ -97,7 +97,7 @@ function copyable(actor, copied, settled) {
 // A command as one press: a click copies all of it, as a terminal's copy button would.
 function copyButton(child, command, copied) {
     const button = new St.Button({child, style_class: 'isle-copy-button', x_expand: true, can_focus: true,
-        accessible_name: 'Copy the command'});
+        accessible_name: 'Copiar el comando'});
     button.connect('clicked', () => {
         copy(command());
         copied();
@@ -304,9 +304,9 @@ export const CommandCard = GObject.registerClass({
         this._foot = new St.BoxLayout({style_class: 'isle-card-foot'});
         this._risks = new St.BoxLayout({style_class: 'isle-card-risks', x_expand: true, y_align: Clutter.ActorAlign.CENTER});
         this._foot.add_child(this._risks);
-        this._stopButton = keyButton('Stop', null, 'isle-card-ghost', () => this._stop());
-        this._deny = keyButton('Deny', 'esc', 'isle-card-ghost', () => this.decide(false));
-        this._run = keyButton('Run', '↩', 'isle-card-run', () => this.decide(true));
+        this._stopButton = keyButton('Detener', null, 'isle-card-ghost', () => this._stop());
+        this._deny = keyButton('Denegar', 'esc', 'isle-card-ghost', () => this.decide(false));
+        this._run = keyButton('Ejecutar', '↩', 'isle-card-run', () => this.decide(true));
         for (const button of [this._stopButton, this._deny, this._run])
             this._foot.add_child(button);
         this.add_child(this._foot);
@@ -333,7 +333,7 @@ export const CommandCard = GObject.registerClass({
         const ended = !waiting && !running;
         this._title.text = card.why;
         // Waiting, the line under the title says what to know; running, how long it has been at it.
-        this._subtitle.text = waiting ? card.detail ?? '' : running ? `Running · ${elapsed(card.seconds ?? 0)}` : '';
+        this._subtitle.text = waiting ? card.detail ?? '' : running ? `Ejecutando · ${elapsed(card.seconds ?? 0)}` : '';
         this._subtitle.visible = Boolean(this._subtitle.text);
         this._command.clutter_text.set_markup(shellMarkup(card.command));
         this._commandText = card.command;
@@ -345,7 +345,7 @@ export const CommandCard = GObject.registerClass({
         if (!running)
             this._disarmStop();
         if (running && this._stopArmed) {
-            this._risks.add_child(riskRow('removes', 'isle-warning-symbolic', 'May leave it half installed'));
+            this._risks.add_child(riskRow('removes', 'isle-warning-symbolic', 'Puede dejarlo a medio instalar'));
         } else if (waiting) {
             // One is enough beside the buttons: the most telling (see RISKS), removing before the web before a password.
             const risk = Object.keys(RISKS).find(key => card.risks?.includes(key));
@@ -416,10 +416,10 @@ export const CommandCard = GObject.registerClass({
     _showStop(armed) {
         if (this._destroyed)
             return;
-        this._stopButton.label_actor.text = armed ? 'Stop anyway' : 'Stop';
+        this._stopButton.label_actor.text = armed ? 'Detener de todos modos' : 'Detener';
         this._risks.destroy_all_children();
         if (armed)
-            this._risks.add_child(riskRow('removes', 'isle-warning-symbolic', 'May leave it half installed'));
+            this._risks.add_child(riskRow('removes', 'isle-warning-symbolic', 'Puede dejarlo a medio instalar'));
     }
 
     // "Copied" for a moment where the card says how it is going: under the title, or at the line's end.
@@ -431,7 +431,7 @@ export const CommandCard = GObject.registerClass({
             GLib.source_remove(this._copiedTimer);
         else
             this._beforeCopied = {label, shown, wasVisible};
-        label.text = 'Copied';
+        label.text = 'Copiado';
         label.visible = true;
         label.add_style_class_name('isle-card-copied');
         if (label === this._statusText)
@@ -485,9 +485,9 @@ export const ChatView = GObject.registerClass({
         this._title = label('Chat', 'isle-chat-title', {x_expand: true, y_align: Clutter.ActorAlign.CENTER});
         header.add_child(this._title);
         header.add_child(iconButton('isle-plus-symbolic', 'isle-button-flat isle-chat-new', () => this.emit('new-chat'),
-            {size: 13, accessibleName: 'New chat'}));
+            {size: 13, accessibleName: 'Chat nuevo'}));
         header.add_child(iconButton('isle-chevron-down-symbolic', 'isle-button-flat isle-chat-new', () => this.emit('close'),
-            {size: 13, accessibleName: 'Hide the conversation'}));
+            {size: 13, accessibleName: 'Ocultar la conversación'}));
         this.add_child(header);
         this._list = new St.BoxLayout({...VERTICAL, style_class: 'isle-chat-list', x_expand: true});
         this._scroll = new St.ScrollView({
@@ -557,7 +557,7 @@ export const ChatView = GObject.registerClass({
             }
             last = item;
         });
-        this._title.text = 'Conversation';
+        this._title.text = 'Conversación';
     }
 
     /** Messages shown. */
@@ -606,13 +606,13 @@ export const ChatView = GObject.registerClass({
 
     // "Copied", in the title's place for a moment.
     _copied() {
-        this._title.text = 'Copied';
+        this._title.text = 'Copiado';
         this._title.add_style_class_name('isle-chat-copied');
         if (this._copiedTimer)
             GLib.source_remove(this._copiedTimer);
         this._copiedTimer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, COPIED_MS, () => {
             this._copiedTimer = 0;
-            this._title.text = 'Conversation';
+            this._title.text = 'Conversación';
             this._title.remove_style_class_name('isle-chat-copied');
             return GLib.SOURCE_REMOVE;
         });

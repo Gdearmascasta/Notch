@@ -29,12 +29,12 @@ const INTRO_MS = 3000;
 
 /** What the view says when there are no lines to show. */
 const STATES = {
-    loading: {dots: true, title: 'Looking for lyrics'},
-    not_found: {icon: 'isle-lyrics', title: 'No lyrics for this song', hint: 'Lyrics come from LRCLIB'},
-    instrumental: {icon: 'isle-music', title: 'Instrumental', hint: 'Nothing to sing along to'},
-    off: {icon: 'isle-lyrics', title: 'Lyrics are off', hint: 'Turn them on in Isle’s settings'},
-    error: {icon: 'isle-lyrics', title: 'Can’t reach the lyrics', hint: 'Check your connection · trying again soon'},
-    unavailable: {icon: 'isle-lyrics', title: 'Lyrics are busy right now', hint: 'Trying again in a moment'},
+    loading: {dots: true, title: 'Buscando la letra'},
+    not_found: {icon: 'isle-lyrics', title: 'No hay letra para esta canción', hint: 'Las letras vienen de LRCLIB'},
+    instrumental: {icon: 'isle-music', title: 'Instrumental', hint: 'No hay nada que cantar'},
+    off: {icon: 'isle-lyrics', title: 'Las letras están desactivadas', hint: 'Actívalas en los ajustes de Isle'},
+    error: {icon: 'isle-lyrics', title: 'No se pueden obtener las letras', hint: 'Revisa tu conexión · se reintentará pronto'},
+    unavailable: {icon: 'isle-lyrics', title: 'Las letras están ocupadas ahora', hint: 'Reintentando en un momento'},
 };
 
 /** Three dots that breathe while the singing pauses. */

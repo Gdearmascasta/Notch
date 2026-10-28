@@ -197,15 +197,15 @@ export const CalendarPage = GObject.registerClass({
         this._year = label('', 'isle-cal-year');
         title.add_child(this._monthName);
         title.add_child(this._year);
-        const titleButton = new St.Button({style_class: 'isle-cal-month-title', child: title, can_focus: true, accessible_name: 'Go to today', x_expand: true, x_align: Clutter.ActorAlign.START});
+        const titleButton = new St.Button({style_class: 'isle-cal-month-title', child: title, can_focus: true, accessible_name: 'Ir a hoy', x_expand: true, x_align: Clutter.ActorAlign.START});
         titleButton.connect('clicked', () => this._goToToday());
         // Its text on the page's edge, as the other pages' titles; the pill it lights on hover reaches past it.
         onUiScale(titleButton, scale => (titleButton.translation_x = -4 * scale));
         header.add_child(titleButton);
         header.add_child(iconButton('isle-chevron-left-symbolic', 'isle-button-flat isle-cal-arrow',
-            () => this._moveMonth(-1), {size: 11, accessibleName: 'Previous month'}));
+            () => this._moveMonth(-1), {size: 11, accessibleName: 'Mes anterior'}));
         header.add_child(iconButton('isle-chevron-right-symbolic', 'isle-button-flat isle-cal-arrow',
-            () => this._moveMonth(1), {size: 11, accessibleName: 'Next month'}));
+            () => this._moveMonth(1), {size: 11, accessibleName: 'Mes siguiente'}));
         column.add_child(header);
 
         const weekdays = new St.BoxLayout({style_class: 'isle-cal-weekdays'});
@@ -238,13 +238,13 @@ export const CalendarPage = GObject.registerClass({
         this._dayName.clutter_text.ellipsize = Pango.EllipsizeMode.END;
         header.add_child(this._dayName);
         this._worldButton = iconButton('isle-globe', 'isle-button-flat isle-cal-world-toggle',
-            () => this._setShowingWorld(!this._showingWorld), {size: 13, accessibleName: 'World clocks'});
+            () => this._setShowingWorld(!this._showingWorld), {size: 13, accessibleName: 'Relojes mundiales'});
         this._worldButton.y_align = Clutter.ActorAlign.CENTER;
         this._worldButton.visible = false;
         // Drawn white: dimmed while off, as the tabs' icons.
         this._worldButton.child.opacity = 150;
         header.add_child(this._worldButton);
-        this._todayButton = new St.Button({style_class: 'isle-cal-today', label: 'Today', can_focus: true, y_align: Clutter.ActorAlign.CENTER});
+        this._todayButton = new St.Button({style_class: 'isle-cal-today', label: 'Hoy', can_focus: true, y_align: Clutter.ActorAlign.CENTER});
         this._todayButton.connect('clicked', () => this._goToToday());
         header.add_child(this._todayButton);
         column.add_child(header);
@@ -281,9 +281,9 @@ export const CalendarPage = GObject.registerClass({
         listArea.add_child(this._scroll);
         this._noEvents = new St.BoxLayout({...VERTICAL, x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER,
             x_expand: true, y_expand: true});
-        this._noEvents.add_child(label('No events', 'isle-cal-empty', {x_align: Clutter.ActorAlign.CENTER}));
+        this._noEvents.add_child(label('No hay eventos', 'isle-cal-empty', {x_align: Clutter.ActorAlign.CENTER}));
         // With no calendar account at all, where to add one.
-        this._noAccounts = new St.Button({style_class: 'isle-cal-accounts', label: 'Add calendars in Online Accounts',
+        this._noAccounts = new St.Button({style_class: 'isle-cal-accounts', label: 'Añade calendarios en Cuentas en línea',
             can_focus: true, x_align: Clutter.ActorAlign.CENTER, visible: false});
         this._noAccounts.connect('clicked', () => {
             GLib.spawn_async(null, ['gnome-control-center', 'online-accounts'], null, GLib.SpawnFlags.SEARCH_PATH, null);
@@ -300,7 +300,7 @@ export const CalendarPage = GObject.registerClass({
 
         // The cities at a glance, as GNOME's calendar menu lists them; a click shows them in full.
         this._worldStrip = new St.Button({style_class: 'isle-cal-world-strip', can_focus: true, x_expand: true,
-            visible: false, accessible_name: 'World clocks'});
+            visible: false, accessible_name: 'Relojes mundiales'});
         this._worldStrip.set_child(new St.BoxLayout({style_class: 'isle-cal-world-strip-box'}));
         this._worldStrip.connect('clicked', () => this._setShowingWorld(true));
         column.add_child(this._worldStrip);
@@ -431,7 +431,7 @@ export const CalendarPage = GObject.registerClass({
         const end = addDays(begin, 1);
         const events = this._systemEvents(begin, end).map(event => ({
             id: event.id ?? null,
-            title: event.summary || 'Untitled',
+            title: event.summary || 'Sin título',
             start: event.date,
             end: event.end,
             allDay: event.date <= begin && event.end >= end,
@@ -606,13 +606,13 @@ export const CalendarPage = GObject.registerClass({
     _renderDayHeader() {
         const day = this._selected;
         const offset = Math.round((day - this._today) / DAY_MS);
-        const name = {'-1': 'Yesterday', 0: 'Today', 1: 'Tomorrow'}[offset] ?? dateTime(day).format('%A');
-        this._dayName.text = this._showingWorld ? 'World Clocks' : `${name}, ${dateTime(day).format('%-d %B')}`;
+        const name = {'-1': 'Ayer', 0: 'Hoy', 1: 'Mañana'}[offset] ?? dateTime(day).format('%A');
+        this._dayName.text = this._showingWorld ? 'Relojes mundiales' : `${name}, ${dateTime(day).format('%-d %B')}`;
         this._todayButton.visible = !this._showingWorld && (offset !== 0 || this._month.getMonth() !== this._today.getMonth() ||
             this._month.getFullYear() !== this._today.getFullYear());
         // "8:00 PM" or "20:00", as the clock is set; written the way Isle reads it, not the locale's "8:00 p. m.".
         const eight = Format.uses12Hour() ? '8:00 PM' : '20:00';
-        this._entry.hint_text = `Add event · e.g. Dinner ${eight}`;
+        this._entry.hint_text = `Añadir evento · p. ej. Cena ${eight}`;
     }
 
     /** Rebuilds the list for the picked day. */
@@ -653,11 +653,11 @@ export const CalendarPage = GObject.registerClass({
         title.clutter_text.ellipsize = Pango.EllipsizeMode.END;
         row.add_child(title);
 
-        let when = 'All day';
+        let when = 'Todo el día';
         if (!event.allDay) {
             // An event that began on an earlier day shows when it ends.
             const startsToday = event.start >= startOfDay(this._selected);
-            when = startsToday ? timeText(event.start) : `until ${timeText(event.end)}`;
+            when = startsToday ? timeText(event.start) : `hasta las ${timeText(event.end)}`;
             if (startsToday && event.end && event.end > event.start && event.end < addDays(startOfDay(this._selected), 1))
                 when += ` – ${timeText(event.end)}`;
         }
@@ -671,7 +671,7 @@ export const CalendarPage = GObject.registerClass({
                     removing = true;
                     this.daemon.call('calendar', 'Remove', event.ownId);
                 }
-            }, {size: REMOVE_SIZE - 6, accessibleName: 'Remove event'});
+            }, {size: REMOVE_SIZE - 6, accessibleName: 'Quitar evento'});
             remove.opacity = 0;
             onHover(row, hovered => remove.ease({opacity: hovered ? 255 : 0, duration: 120}));
             row.add_child(remove);
