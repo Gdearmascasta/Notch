@@ -8,5 +8,8 @@ B=~/.config/isle-es/original-$V
 [ -d "$B" ] || cp -a "$I" "$B"
 python3 -I "$K/apply.py" "$I"
 python3 -I "$K/extras.py" "$I"
+for p in "$K"/*.patch; do
+	patch -p2 -N -s -r - -d "$I" <"$p" || echo "AVISO: $(basename "$p") no se pudo aplicar entero, revísalo a mano"
+done
 for f in "$I"/prefs.js "$I"/extension.js "$I"/src/*.js "$I"/src/pages/*.js; do node --check "$f"; done
 echo "Listo (Isle $V; copia sin tocar en $B). Cierra sesión y vuelve a entrar."

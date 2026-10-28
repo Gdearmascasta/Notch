@@ -9,11 +9,12 @@ Cambios sobre `gnome-extension/`:
 - Isla cerrada en negro al 85 % con borde interior blanco al 12 % (`ISLAND_ALPHA`, `BORDER_ALPHA` en `src/island.js`); la ventana abierta usa negro sólido sin borde.
 - Con música sonando, la isla cerrada toma el color de la carátula con tinte `wash` (`pages/media.js`, `controller.js`).
 - Barras de sonido del notch a 18 px (`compact.js`).
+- El portapapeles es una lista de filas de una línea (icono, texto y antigüedad) en vez de tarjetas de 136×96 px; ↑ ↓ mueven la selección (`es/lista-portapapeles.patch`).
 
 Los textos que genera el demonio `isled` siguen en inglés.
 
 ## Reaplicar sobre una instalación actualizada
 
-`es/reaplicar.sh` aplica `es.py` (diccionario), `apply.py` y `extras.py` sobre la extensión instalada en
+`es/reaplicar.sh` aplica `es.py` (diccionario), `apply.py`, `extras.py` y los `*.patch` sobre la extensión instalada en
 `~/.local/share/gnome-shell/extensions/isle@zickrian.github.io` y comprueba la sintaxis con `node --check`.
 Después hay que cerrar sesión y volver a entrar.

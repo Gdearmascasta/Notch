@@ -892,13 +892,12 @@
 /* While a file is on its way in. */
 .isle-shelf-hint.active { color: #ffffff; font-weight: 600; }
 
-.isle-clips-scroll { -st-hfade-offset: 18px; }
-.isle-clips { spacing: 8px; }
+.isle-clips-scroll { -st-vfade-offset: 18px; }
+.isle-clips { spacing: 4px; }
 
 .isle-clip {
-  width: 136px;
-  height: 96px;
-  border-radius: 12px;
+  height: 34px;
+  border-radius: 10px;
   border: 2px solid transparent;
   background-color: #1c1c1e;
   color: #ffffff;
@@ -908,34 +907,18 @@
 /* The keyboard's choice, for Enter to paste. */
 .isle-clip:selected { border-color: #ffffff; }
 
-.isle-clip-header { padding: 7px 9px; spacing: 5px; }
+.isle-clip-row { padding: 0 10px; spacing: 8px; }
+.isle-clip-row-thumb { width: 28px; height: 20px; border-radius: 4px; background-size: cover; background-color: #2c2c2e; }
 .isle-clip-age { font-size: 12px; color: rgba(255, 255, 255, 0.5); }
-.isle-clip-body { padding: 28px 10px 8px 10px; spacing: 2px; }
 .isle-clip-text { font-size: 12px; }
 .isle-clip-code { font-family: monospace; font-size: 12px; }
-.isle-clip-host { font-size: 13px; font-weight: 700; }
-.isle-clip-url { font-size: 12px; color: rgba(255, 255, 255, 0.55); }
-.isle-clip-file-name { font-size: 12px; font-weight: 600; padding-top: 4px; }
-.isle-clip-subtle { font-size: 12px; color: rgba(255, 255, 255, 0.5); }
 
-/* Images fill the card; header and size sit on dark pills over them. */
-.isle-clip-thumb { border-radius: 12px; background-size: cover; background-color: #2c2c2e; }
-.isle-clip-image .isle-clip-header {
-  margin: 5px;
-  padding: 3px 7px;
-  border-radius: 999px;
-  background-color: rgba(0, 0, 0, 0.6);
-}
-
-.isle-clip-badge { margin: 5px; padding: 2px 6px; border-radius: 999px; background-color: rgba(0, 0, 0, 0.6); }
-.isle-clip-badge-label { font-size: 11px; font-weight: 600; }
-
-.isle-clip-actions { padding: 5px; spacing: 4px; }
+.isle-clip-actions { padding: 0 6px; spacing: 4px; }
 .isle-clip-action { padding: 4px; background-color: #3a3a3c; }
 .isle-clip-action:hover { background-color: #4a4a4c; }
 
-.isle-clip-feedback { border-radius: 12px; background-color: rgba(28, 28, 30, 0.95); }
-.isle-clip-feedback-label { font-size: 12px; font-weight: 700; padding-top: 4px; }
+.isle-clip-feedback { border-radius: 10px; background-color: rgba(28, 28, 30, 0.95); }
+.isle-clip-feedback-label { font-size: 12px; font-weight: 700; padding-left: 6px; }
 
 /* Files tab. The shelf helper's window draws this tab when installed; its
  * style.css mirrors these sizes and colours so the two look the same. */

@@ -2,3 +2,4 @@
 gnome-extension/schemas/gschemas.compiled
 /dist
 /node_modules
+__pycache__/

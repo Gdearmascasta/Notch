@@ -1,0 +1,361 @@
+diff --git a/gnome-extension/src/pages/clips.js b/gnome-extension/src/pages/clips.js
+index fcf5378..44d0e28 100644
+--- a/gnome-extension/src/pages/clips.js
++++ b/gnome-extension/src/pages/clips.js
+@@ -1,7 +1,7 @@
+ // SPDX-License-Identifier: GPL-3.0-or-later
+ // Copyright (C) 2026 zickrian
+ 
+-// Cards for the Shelf page's Clipboard tab, pinned first, then newest. Click to copy; on hover: pin,
++// Rows for the Shelf page's Clipboard tab, one line each, pinned first, then newest. Click to copy; on hover: pin,
+ // a hand-off (text to Tasks, images and files to Files) and ×. The keyboard can select and paste.
+ 
+ import Clutter from 'gi://Clutter';
+@@ -14,7 +14,7 @@ import St from 'gi://St';
+ 
+ import {VERTICAL} from '../compat.js';
+ import * as Format from '../format.js';
+-import {icon, iconButton, label, wrapLines} from '../widgets.js';
++import {icon, iconButton, label} from '../widgets.js';
+ import {SHELF_CAPACITY} from './files.js';
+ 
+ /** isled keeps 20 recent items and up to 10 pinned ones. */
+@@ -33,15 +33,6 @@ function appFor(appId) {
+     return appId ? Shell.AppSystem.get_default().lookup_app(appId) : null;
+ }
+ 
+-/** A link card's site name; the whole URL if it doesn't parse. */
+-function hostOf(url) {
+-    try {
+-        return GLib.Uri.parse(url, GLib.UriFlags.NONE).get_host() ?? url;
+-    } catch {
+-        return url;
+-    }
+-}
+-
+ /** Whether `item` matches the search `query` (already lower case): its app's name or what the card shows, or,
+  * as isled found (`found`, ids), any of its text. */
+ function matches(item, query, found) {
+@@ -57,7 +48,7 @@ export const ClipsView = GObject.registerClass({
+         'activated': {param_types: [GObject.TYPE_JSOBJECT, GObject.TYPE_BOOLEAN]},
+     },
+ }, class ClipsView extends St.Widget {
+-    /** A sideways strip of cards, with an empty state in its place when none match. */
++    /** A list of one-line rows, with an empty state in its place when none match. */
+     _init(daemon) {
+         super._init({layout_manager: new Clutter.BinLayout(), x_expand: true, y_expand: true});
+         this._daemon = daemon;
+@@ -83,17 +74,16 @@ export const ClipsView = GObject.registerClass({
+         /** A card's "Copied" (or similar), kept across redraws while it shows. */
+         this._flashing = null;
+ 
+-        this._strip = new St.BoxLayout({style_class: 'isle-clips'});
++        this._strip = new St.BoxLayout({...VERTICAL, style_class: 'isle-clips', x_expand: true});
+         this._scroll = new St.ScrollView({
+             style_class: 'isle-clips-scroll',
+-            hscrollbar_policy: St.PolicyType.EXTERNAL,
+-            vscrollbar_policy: St.PolicyType.NEVER,
++            hscrollbar_policy: St.PolicyType.NEVER,
++            vscrollbar_policy: St.PolicyType.EXTERNAL,
+             x_expand: true,
+             y_expand: true,
+         });
+         this._scroll.set_child(this._strip);
+-        // The wheel scrolls the cards sideways when they overflow, rather
+-        // than flipping the page.
++        // The wheel scrolls the list when it overflows, rather than flipping the page.
+         this._scroll.connect('scroll-event', (_actor, event) => this._onScroll(event));
+         this.add_child(this._scroll);
+ 
+@@ -306,16 +296,16 @@ export const ClipsView = GObject.registerClass({
+         // Arrowing faster than the cards are drawn.
+         this._addCards(Infinity, this._selected + 1);
+         // Keep the selected card in view.
+-        // Cards just drawn have no position yet; all are the same width.
++        // Rows just drawn have no position yet; all are the same height.
+         const first = this._cards.get(this._shown[0].id);
+         const spacing = this._strip.get_theme_node().get_length('spacing');
+-        const width = first.width;
+-        const x = this._selected * (width + spacing);
+-        const adjustment = this._scroll.hadjustment;
+-        if (x < adjustment.value)
+-            adjustment.ease(x, {duration: 150, mode: Clutter.AnimationMode.EASE_OUT_QUAD});
+-        else if (x + width > adjustment.value + adjustment.page_size)
+-            adjustment.ease(x + width - adjustment.page_size, {duration: 150, mode: Clutter.AnimationMode.EASE_OUT_QUAD});
++        const height = first.height;
++        const y = this._selected * (height + spacing);
++        const adjustment = this._scroll.vadjustment;
++        if (y < adjustment.value)
++            adjustment.ease(y, {duration: 150, mode: Clutter.AnimationMode.EASE_OUT_QUAD});
++        else if (y + height > adjustment.value + adjustment.page_size)
++            adjustment.ease(y + height - adjustment.page_size, {duration: 150, mode: Clutter.AnimationMode.EASE_OUT_QUAD});
+     }
+ 
+     /** Chooses the selected card, as Enter does. */
+@@ -343,9 +333,9 @@ export const ClipsView = GObject.registerClass({
+         }
+     }
+ 
+-    /** Any wheel direction moves the strip sideways, once it overflows. */
++    /** Any wheel direction moves the list, once it overflows. */
+     _onScroll(event) {
+-        const adjustment = this._scroll.hadjustment;
++        const adjustment = this._scroll.vadjustment;
+         if (adjustment.upper <= adjustment.page_size)
+             return Clutter.EVENT_PROPAGATE;
+         let delta = 0;
+@@ -370,23 +360,22 @@ export const ClipsView = GObject.registerClass({
+ 
+     // Cards
+ 
+-    /** Body, hover actions, header and a feedback layer, stacked. */
++    /** The row, hover actions and a feedback layer, stacked. */
+     _card(item) {
+         const card = new St.Widget({
+             style_class: `isle-clip isle-clip-${item.kind}`,
+             layout_manager: new Clutter.BinLayout(),
+             reactive: true,
+             track_hover: true,
+-            x_expand: false,
++            x_expand: true,
+             y_expand: false,
+             // Long text must not spill out of the card.
+             clip_to_allocation: true,
+         });
+         card.set_pivot_point(0.5, 0.5);
+-        card.add_child(this._body(item));
++        card.add_child(this._row(item, card));
+         const actions = this._actions(item, card);
+         card.add_child(actions);
+-        card.add_child(this._header(item, card));
+ 
+         const feedback = new St.BoxLayout({
+             style_class: 'isle-clip-feedback',
+@@ -395,9 +384,9 @@ export const ClipsView = GObject.registerClass({
+             opacity: 0,
+             visible: false,
+         });
+-        const feedbackBox = new St.BoxLayout({...VERTICAL, x_expand: true, x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER});
+-        card._feedbackIcon = new St.Icon({icon_size: 18, x_align: Clutter.ActorAlign.CENTER});
+-        card._feedbackLabel = label('', 'isle-clip-feedback-label', {x_align: Clutter.ActorAlign.CENTER});
++        const feedbackBox = new St.BoxLayout({x_expand: true, x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER});
++        card._feedbackIcon = new St.Icon({icon_size: 14, y_align: Clutter.ActorAlign.CENTER});
++        card._feedbackLabel = label('', 'isle-clip-feedback-label', {y_align: Clutter.ActorAlign.CENTER});
+         feedbackBox.add_child(card._feedbackIcon);
+         feedbackBox.add_child(card._feedbackLabel);
+         feedback.add_child(feedbackBox);
+@@ -449,84 +438,51 @@ export const ClipsView = GObject.registerClass({
+         });
+     }
+ 
+-    /** Pin, app icon and age in the top-left corner. */
+-    _header(item, card) {
+-        const header = new St.BoxLayout({
+-            style_class: 'isle-clip-header',
+-            x_expand: true,
+-            y_expand: true,
+-            x_align: Clutter.ActorAlign.START,
+-            y_align: Clutter.ActorAlign.START,
+-        });
+-        const app = appFor(item.app_id);
++    /** Pin, a thumbnail or icon, one line of what was copied, and its age. */
++    _row(item, card) {
++        const row = new St.BoxLayout({style_class: 'isle-clip-row', x_expand: true, y_expand: true});
++        const center = {y_align: Clutter.ActorAlign.CENTER};
+         if (item.pinned)
+-            header.add_child(new St.Icon({gicon: icon('isle-pin-fill'), icon_size: 11, style_class: 'isle-clip-pin', y_align: Clutter.ActorAlign.CENTER}));
+-        if (app)
+-            header.add_child(new St.Icon({gicon: app.get_icon(), icon_size: 13, y_align: Clutter.ActorAlign.CENTER}));
+-        const age = GLib.DateTime.new_from_unix_local(Math.floor(item.at_ms / 1000));
+-        const ageLabel = label(Format.ago(age), 'isle-clip-age', {y_align: Clutter.ActorAlign.CENTER});
+-        card._age = [ageLabel, age];
+-        header.add_child(ageLabel);
+-        return header;
+-    }
++            row.add_child(new St.Icon({gicon: icon('isle-pin-fill'), icon_size: 11, style_class: 'isle-clip-pin', ...center}));
+ 
+-    /** Per kind: a thumbnail, a file icon and name, a host and URL, or the text itself. */
+-    _body(item) {
++        const app = appFor(item.app_id);
++        let text;
+         switch (item.kind) {
+         case 'image': {
+-            const body = new St.Widget({style_class: 'isle-clip-thumb', x_expand: true, y_expand: true});
++            const thumb = new St.Widget({style_class: 'isle-clip-row-thumb', ...center});
+             if (item.thumb)
+-                body.style = `background-image: url("${GLib.filename_to_uri(item.thumb, null).replace(/"/g, '%22')}");`;
+-            const size = new St.Bin({
+-                style_class: 'isle-clip-badge',
+-                child: label(`${item.width}×${item.height}`, 'isle-clip-badge-label'),
+-                x_expand: true,
+-                y_expand: true,
+-                x_align: Clutter.ActorAlign.START,
+-                y_align: Clutter.ActorAlign.END,
+-            });
+-            const layers = new St.Widget({layout_manager: new Clutter.BinLayout(), x_expand: true, y_expand: true});
+-            layers.add_child(body);
+-            if (item.width && item.height)
+-                layers.add_child(size);
+-            return layers;
++                thumb.style = `background-image: url("${GLib.filename_to_uri(item.thumb, null).replace(/"/g, '%22')}");`;
++            row.add_child(thumb);
++            text = item.width && item.height ? `Imagen · ${item.width}×${item.height}` : 'Imagen';
++            break;
+         }
+         case 'files': {
+-            const box = new St.BoxLayout({...VERTICAL, style_class: 'isle-clip-body', x_expand: true, y_expand: true});
+             const names = item.preview.split('\n');
+             const [type] = Gio.content_type_guess(names[0], null);
+-            box.add_child(new St.Icon({gicon: Gio.content_type_get_icon(type), icon_size: 28, style_class: 'isle-clip-file-icon', x_align: Clutter.ActorAlign.START}));
+-            const name = label(names[0], 'isle-clip-file-name');
+-            name.clutter_text.ellipsize = Pango.EllipsizeMode.MIDDLE;
+-            box.add_child(name);
+-            if (names.length > 1)
+-                box.add_child(label(`+${names.length - 1} more`, 'isle-clip-subtle'));
+-            return box;
++            row.add_child(new St.Icon({gicon: Gio.content_type_get_icon(type), icon_size: 16, ...center}));
++            text = names.length > 1 ? `${names[0]}  +${names.length - 1} más` : names[0];
++            break;
+         }
+         case 'link': {
+-            const box = new St.BoxLayout({...VERTICAL, style_class: 'isle-clip-body', x_expand: true, y_expand: true});
+             const link = item.preview.trim();
+-            const host = label(hostOf(link), 'isle-clip-host');
+-            host.clutter_text.ellipsize = Pango.EllipsizeMode.END;
+-            const url = label(link.replace(/^https?:\/\//i, ''), 'isle-clip-url', {y_expand: true, y_align: Clutter.ActorAlign.FILL});
+-            wrapLines(url, Pango.EllipsizeMode.END);
+-            box.add_child(host);
+-            box.add_child(url);
+-            return box;
+-        }
+-        default: {
+-            const box = new St.BoxLayout({...VERTICAL, style_class: 'isle-clip-body', x_expand: true, y_expand: true});
+-            const code = CODE_PATTERN.test(item.preview);
+-            // Leading blank lines and long runs of spaces waste the card.
+-            const shown = code ? item.preview.replace(/^\s*\n/, '') : item.preview.replace(/\s+/g, ' ').trim();
+-            // The card's height for its lines: else the text asks for one line and is cut there.
+-            const text = label(shown.slice(0, 160), code ? 'isle-clip-text isle-clip-code' : 'isle-clip-text',
+-                {y_expand: true, y_align: Clutter.ActorAlign.FILL});
+-            wrapLines(text, Pango.EllipsizeMode.END);
+-            box.add_child(text);
+-            return box;
++            row.add_child(new St.Icon({gicon: app?.get_icon() ?? icon('isle-link'), icon_size: 16, ...center}));
++            text = link.replace(/^https?:\/\//i, '');
++            break;
+         }
++        default:
++            row.add_child(new St.Icon({gicon: app?.get_icon() ?? icon('isle-clipboard'), icon_size: 16, ...center}));
++            text = item.preview.replace(/\s+/g, ' ').trim().slice(0, 200);
+         }
++        const code = item.kind === 'text' && CODE_PATTERN.test(item.preview);
++        const preview = label(text, code ? 'isle-clip-text isle-clip-code' : 'isle-clip-text', {x_expand: true, ...center});
++        preview.clutter_text.ellipsize = item.kind === 'files' ? Pango.EllipsizeMode.MIDDLE : Pango.EllipsizeMode.END;
++        row.add_child(preview);
++
++        const age = GLib.DateTime.new_from_unix_local(Math.floor(item.at_ms / 1000));
++        const ageLabel = label(Format.ago(age), 'isle-clip-age', center);
++        card._age = [ageLabel, age];
++        row.add_child(ageLabel);
++        return row;
+     }
+ 
+     // Puts a copy of a clipboard image on the shelf under a readable name: the history's file goes when
+@@ -554,14 +510,14 @@ export const ClipsView = GObject.registerClass({
+         attempt(1);
+     }
+ 
+-    /** Pin, a hand-off and × in the top-right corner, shown on hover. */
++    /** Pin, a hand-off and × at the row's right end, over its age, shown on hover. */
+     _actions(item, card) {
+         const actions = new St.BoxLayout({
+             style_class: 'isle-clip-actions',
+             x_expand: true,
+             y_expand: true,
+             x_align: Clutter.ActorAlign.END,
+-            y_align: Clutter.ActorAlign.START,
++            y_align: Clutter.ActorAlign.CENTER,
+             opacity: 0,
+         });
+         // St.Button stops the release it handles, so a click on one of these
+diff --git a/gnome-extension/src/pages/shelf.js b/gnome-extension/src/pages/shelf.js
+index 33eae2b..2a10a01 100644
+--- a/gnome-extension/src/pages/shelf.js
++++ b/gnome-extension/src/pages/shelf.js
+@@ -481,12 +481,14 @@ export const ShelfPage = GObject.registerClass({
+         this._clips.kind = kind;
+     }
+ 
+-    /** ← → move between cards; Esc empties the search before it can close the island. */
++    /** ↑ ↓ (or ← →) move between rows; Esc empties the search before it can close the island. */
+     _onSearchKey(event) {
+         switch (event.get_key_symbol()) {
++        case Clutter.KEY_Up:
+         case Clutter.KEY_Left:
+             this._clips.moveSelection(-1);
+             return Clutter.EVENT_STOP;
++        case Clutter.KEY_Down:
+         case Clutter.KEY_Right:
+             this._clips.moveSelection(1);
+             return Clutter.EVENT_STOP;
+diff --git a/gnome-extension/stylesheet.css b/gnome-extension/stylesheet.css
+index b33a5b4..8b344fd 100644
+--- a/gnome-extension/stylesheet.css
++++ b/gnome-extension/stylesheet.css
+@@ -892,13 +892,12 @@
+ /* While a file is on its way in. */
+ .isle-shelf-hint.active { color: #ffffff; font-weight: 600; }
+ 
+-.isle-clips-scroll { -st-hfade-offset: 18px; }
+-.isle-clips { spacing: 8px; }
++.isle-clips-scroll { -st-vfade-offset: 18px; }
++.isle-clips { spacing: 4px; }
+ 
+ .isle-clip {
+-  width: 136px;
+-  height: 96px;
+-  border-radius: 12px;
++  height: 34px;
++  border-radius: 10px;
+   border: 2px solid transparent;
+   background-color: #1c1c1e;
+   color: #ffffff;
+@@ -908,34 +907,18 @@
+ /* The keyboard's choice, for Enter to paste. */
+ .isle-clip:selected { border-color: #ffffff; }
+ 
+-.isle-clip-header { padding: 7px 9px; spacing: 5px; }
++.isle-clip-row { padding: 0 10px; spacing: 8px; }
++.isle-clip-row-thumb { width: 28px; height: 20px; border-radius: 4px; background-size: cover; background-color: #2c2c2e; }
+ .isle-clip-age { font-size: 12px; color: rgba(255, 255, 255, 0.5); }
+-.isle-clip-body { padding: 28px 10px 8px 10px; spacing: 2px; }
+ .isle-clip-text { font-size: 12px; }
+ .isle-clip-code { font-family: monospace; font-size: 12px; }
+-.isle-clip-host { font-size: 13px; font-weight: 700; }
+-.isle-clip-url { font-size: 12px; color: rgba(255, 255, 255, 0.55); }
+-.isle-clip-file-name { font-size: 12px; font-weight: 600; padding-top: 4px; }
+-.isle-clip-subtle { font-size: 12px; color: rgba(255, 255, 255, 0.5); }
+-
+-/* Images fill the card; header and size sit on dark pills over them. */
+-.isle-clip-thumb { border-radius: 12px; background-size: cover; background-color: #2c2c2e; }
+-.isle-clip-image .isle-clip-header {
+-  margin: 5px;
+-  padding: 3px 7px;
+-  border-radius: 999px;
+-  background-color: rgba(0, 0, 0, 0.6);
+-}
+-
+-.isle-clip-badge { margin: 5px; padding: 2px 6px; border-radius: 999px; background-color: rgba(0, 0, 0, 0.6); }
+-.isle-clip-badge-label { font-size: 11px; font-weight: 600; }
+ 
+-.isle-clip-actions { padding: 5px; spacing: 4px; }
++.isle-clip-actions { padding: 0 6px; spacing: 4px; }
+ .isle-clip-action { padding: 4px; background-color: #3a3a3c; }
+ .isle-clip-action:hover { background-color: #4a4a4c; }
+ 
+-.isle-clip-feedback { border-radius: 12px; background-color: rgba(28, 28, 30, 0.95); }
+-.isle-clip-feedback-label { font-size: 12px; font-weight: 700; padding-top: 4px; }
++.isle-clip-feedback { border-radius: 10px; background-color: rgba(28, 28, 30, 0.95); }
++.isle-clip-feedback-label { font-size: 12px; font-weight: 700; padding-left: 6px; }
+ 
+ /* Files tab. The shelf helper's window draws this tab when installed; its
+  * style.css mirrors these sizes and colours so the two look the same. */

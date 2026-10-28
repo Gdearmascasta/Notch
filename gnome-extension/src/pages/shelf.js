@@ -481,12 +481,14 @@ export const ShelfPage = GObject.registerClass({
         this._clips.kind = kind;
     }
 
-    /** ← → move between cards; Esc empties the search before it can close the island. */
+    /** ↑ ↓ (or ← →) move between rows; Esc empties the search before it can close the island. */
     _onSearchKey(event) {
         switch (event.get_key_symbol()) {
+        case Clutter.KEY_Up:
         case Clutter.KEY_Left:
             this._clips.moveSelection(-1);
             return Clutter.EVENT_STOP;
+        case Clutter.KEY_Down:
         case Clutter.KEY_Right:
             this._clips.moveSelection(1);
             return Clutter.EVENT_STOP;
