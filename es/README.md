@@ -10,6 +10,8 @@ Cambios sobre `gnome-extension/`:
 - Con música sonando, la isla cerrada toma el color de la carátula con tinte `wash` (`pages/media.js`, `controller.js`).
 - Barras de sonido del notch a 18 px (`compact.js`).
 - El portapapeles es una lista de filas de una línea (icono, texto y antigüedad) en vez de tarjetas de 136×96 px; ↑ ↓ mueven la selección (`es/lista-portapapeles.patch`).
+- La isla cerrada muestra el asistente (el fantasma, parpadeando cada pocos segundos) en lugar de la hora, y el reloj de GNOME vuelve a la barra, a la izquierda con Just Perfection (`clock-menu-position=2`), con su calendario (`es/fantasma-reloj.patch`).
+- La página de música toma el degradado del color de la carátula también en el reproductor, no solo en la letra (`es/musica-degradado.patch`).
 
 Los textos que genera el demonio `isled` siguen en inglés.
 

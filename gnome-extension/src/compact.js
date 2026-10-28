@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 zickrian
 
-// The resting island: the clock between live activities (recording, call, music or timer on the left, privacy
+// The resting island: the assistant between live activities (recording, call, music or timer on the left, privacy
 // dots far right), a moon before it in Do Not Disturb. A second activity takes the right side.
 
 import Clutter from 'gi://Clutter';
@@ -15,11 +15,12 @@ import {onUiScale, px, uiScale} from './compat.js';
 import * as Format from './format.js';
 import * as Palette from './palette.js';
 import * as Playback from './playback.js';
-import {watchClock} from './wallClock.js';
 import {Art, Bars, PrivacyDots, RecordingDot, Ring, icon, restsAt} from './widgets.js';
 
 /** The assistant at work, in the right slot. */
 const ASSISTANT_SIZE = 18;
+/** The assistant in the clock's place, where GNOME's clock no longer is (it shows in the top bar). */
+const RESTING_SIZE = 22;
 
 /** Sizes hanging below the top bar, and inside it with smaller text, in CSS pixels. */
 const SIZES = {
@@ -73,16 +74,22 @@ export const CompactView = GObject.registerClass({
         this._assistant = new BotIcon(ASSISTANT_SIZE, this._botLook());
         this._assistant.y_align = Clutter.ActorAlign.CENTER;
         this._botLookChanged = ['bot-shape', 'bot-color', 'bot-glow'].map(key =>
-            settings.connect(`changed::${key}`, () => (this._assistant.look = this._botLook())));
+            settings.connect(`changed::${key}`, () => {
+                this._assistant.look = this._botLook();
+                this._ghost.look = this._botLook();
+            }));
 
         const center = new St.Widget({layout_manager: new Clutter.BinLayout(), x_expand: true});
         const times = new St.Widget({layout_manager: new Clutter.BinLayout(), y_align: Clutter.ActorAlign.CENTER});
-        this._clock = new St.Label({style_class: 'isle-compact-clock', x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER});
+        // The assistant at rest, blinking and glancing every few seconds.
+        this._ghost = new BotIcon(RESTING_SIZE, this._botLook());
+        this._ghost.set({x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER});
+        this._ghost.alive = true;
         // How long the screen has been recording, in place of the clock.
         this._elapsed = new St.Label({style_class: 'isle-compact-clock', x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER, visible: false});
         // How long the call has lasted, in green.
         this._callTime = new St.Label({style_class: 'isle-compact-clock isle-compact-call-time', x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER, visible: false});
-        times.add_child(this._clock);
+        times.add_child(this._ghost);
         times.add_child(this._elapsed);
         times.add_child(this._callTime);
         // Do Not Disturb: a moon before the time (or what takes its place), as iOS shows a Focus, whatever the sides hold.
@@ -141,8 +148,6 @@ export const CompactView = GObject.registerClass({
             if (this.mapped && ((this._privacyBalance.visible && !this._privacyBalance.width) || second))
                 this._refresh();
         });
-        this._tickClock();
-        this._stopClock = watchClock(() => this._tickClock());
         this._refresh();
         // Another scale: the sides are measured again.
         onUiScale(this, () => this._refresh(), {now: false});
@@ -336,7 +341,7 @@ export const CompactView = GObject.registerClass({
             this._tickRecording();
         } else {
             this._cancel('recording');
-            this._crossfade(onCall ? this._callTime : this._clock);
+            this._crossfade(onCall ? this._callTime : this._ghost);
         }
         this._tickCall();
 
@@ -346,7 +351,7 @@ export const CompactView = GObject.registerClass({
 
     /** Fades `actor` in and the other centre actors out. */
     _crossfade(actor) {
-        for (const other of [this._clock, this._elapsed, this._callTime]) {
+        for (const other of [this._ghost, this._elapsed, this._callTime]) {
             if (other === actor) {
                 if (!other.visible) {
                     other.opacity = 0;
@@ -459,10 +464,6 @@ export const CompactView = GObject.registerClass({
         this._later('call', 1000 - (elapsedMs % 1000) + 10, () => this._tickCall());
     }
 
-    /** Sets the clock's text; `watchClock` calls it again as the minute changes. */
-    _tickClock() {
-        this._clock.text = Format.clockTime();
-    }
 
     /** Runs `callback` once after `ms`, replacing any timeout of the same name. */
     _later(name, ms, callback) {
@@ -490,7 +491,6 @@ export const CompactView = GObject.registerClass({
 
     /** Stops timers and signals, and destroys the signs not in a slot right now. */
     _onDestroy() {
-        this._stopClock();
         for (const name of Object.keys(this._timeouts))
             this._cancel(name);
         this._daemon.disconnect(this._daemonChanged);

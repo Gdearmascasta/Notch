@@ -85,9 +85,9 @@ class MediaPage extends Page {
         return this._shown('lyrics') ? px(LYRICS_WIDTH) : null;
     }
 
-    /** The cover's colour, behind the lyrics only. */
+    /** The cover's colour, behind the player and the lyrics while there is a track. */
     get tint() {
-        return this._shown('lyrics') ? this._tint : null;
+        return Playback.hasTrack(this.daemon.state.nowPlaying) ? this._tint : null;
     }
 
     /** The cover's colour while a song plays, for the closed island to take; null otherwise. */

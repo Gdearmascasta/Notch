@@ -28,17 +28,16 @@ const COMPACT_BAR_CLASS = 'isle-compact-bar';
 /** Style class making the top bar as tall as the closed island. */
 const NOTCH_BAR_CLASS = 'isle-notch-bar';
 
-// Restyles the top bar around the island (black or glass) and hides the clock and its calendar menu.
+// Restyles the top bar around the island (black or glass). GNOME's clock stays, on the left of the bar
+// (Just Perfection's clock-menu-position), with its calendar menu; the island shows the assistant instead.
 // Signals: `height-changed`, `style-changed` (`blendsIn` may have changed), `calendar-requested` (Super+V).
 export class TopBar extends Signals.EventEmitter {
-    /** Hides the clock at once; Super+V comes to Isle unless Settings leaves it to GNOME. */
+    /** Super+V comes to Isle unless Settings leaves it to GNOME. */
     constructor(settings) {
         super();
         this._settings = settings;
         this._toggle = () => this.emit('calendar-requested');
         this._dateMenu = Main.panel.statusArea.dateMenu;
-        this._dateMenu.opacity = 0;
-        this._dateMenu.reactive = false;
 
         this._settingsChanged = [
             ...['top-bar-style', 'top-bar-opacity'].map(key => settings.connect(`changed::${key}`, () => {
@@ -57,15 +56,10 @@ export class TopBar extends Signals.EventEmitter {
 
         this._heightChanged = Main.panel.connect('notify::height', () => this.emit('height-changed'));
 
-        // The calendar shortcut opens the island instead, and the hidden clock's menu is closed again
-        // should anything else open it; unless Super+V is left to GNOME (Settings).
+        // The calendar shortcut opens the island instead, unless Super+V is left to GNOME (Settings).
         this._superVChanged = settings.connect('changed::super-v', () => this._syncCalendar());
         this._pagesChanged = settings.connect('changed::hidden-pages', () => this._syncCalendar());
         this._syncCalendar();
-        this._menuChanged = this._dateMenu.menu.connect('open-state-changed', (menu, open) => {
-            if (open && !this._clockShown && this._superVIsIsle)
-                menu.close();
-        });
     }
 
     /** In stage pixels; it changes with the compact and notch styles. */
@@ -111,21 +105,11 @@ export class TopBar extends Signals.EventEmitter {
         return this.opacity >= 100;
     }
 
-    /** Keeps the top bar's centre clear for the island. */
-    reserveWidth(width) {
-        this._dateMenu.set_width(Math.ceil(width));
-    }
+    /** The clock is not in the centre, so nothing there needs to make room for the island. */
+    reserveWidth(_width) {}
 
-    /** Shows GNOME's own clock in the top bar while the island is on another display. */
-    set clockShown(shown) {
-        this._clockShown = shown;
-        this._dateMenu.opacity = shown ? 255 : 0;
-        this._dateMenu.reactive = shown;
-        if (shown)
-            this._dateMenu.set_width(-1);
-        else if (this._superVIsIsle)
-            this._dateMenu.menu.close();
-    }
+    /** GNOME's clock always shows, wherever the island is. */
+    set clockShown(_shown) {}
 
     /** Colour and style classes from the settings; remembers `blendsIn` to spot a change. */
     _applyStyle() {
@@ -194,7 +178,6 @@ export class TopBar extends Signals.EventEmitter {
         this._settingsChanged.forEach(id => this._settings.disconnect(id));
         Main.panel.disconnect(this._heightChanged);
         Main.panel.disconnect(this._styleChanged);
-        this._dateMenu.menu.disconnect(this._menuChanged);
         this._settings.disconnect(this._superVChanged);
         this._settings.disconnect(this._pagesChanged);
         this._restoreToggle();
