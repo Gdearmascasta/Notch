@@ -113,3 +113,10 @@ patch('prefs.js', [
 ("            ['', 'Cualquiera (detectado)'],\n",
  "            ['', 'Cualquiera (detectado)'],\n            ['es', 'Español'],\n            ['es,en', 'Español o inglés'],\n"),
 ])
+# Textos de actionRules.js armados con plantillas, que es.py no alcanza
+patch('src/actionRules.js', [
+("""    const turning = (name, on) => `Turning ${name} ${on === false ? 'off' : 'on'}…`;""",
+"""    const turning = (name, on) => `${on === false ? 'Desactivando' : 'Activando'} ${name}…`;"""),
+("""`${what.replace(/…$/, '')} and ${actions.length - 1} more…`""",
+"""`${what.replace(/…$/, '')} y ${actions.length - 1} más…`"""),
+])

@@ -9,7 +9,7 @@ export function describeActions(actions = []) {
     if (!first)
         return 'Trabajando…';
     // On unless the action says off.
-    const turning = (name, on) => `Turning ${name} ${on === false ? 'off' : 'on'}…`;
+    const turning = (name, on) => `${on === false ? 'Desactivando' : 'Activando'} ${name}…`;
     const what = {
         open_app: `Abriendo ${first.app ?? 'la app'}…`,
         open_url: 'Abriendo la página…',
@@ -46,7 +46,7 @@ export function describeActions(actions = []) {
         lock: 'Bloqueando la pantalla…',
         write: 'Escribiéndolo…',
     }[first.type] ?? 'Trabajando en ello…';
-    return actions.length > 1 ? `${what.replace(/…$/, '')} and ${actions.length - 1} more…` : what;
+    return actions.length > 1 ? `${what.replace(/…$/, '')} y ${actions.length - 1} más…` : what;
 }
 
 /** What isled's runner wraps each command in (see tasks.rs); a command to start must use exactly this. */
