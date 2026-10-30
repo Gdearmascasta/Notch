@@ -541,7 +541,7 @@ export function taskAsks(card, look, answer) {
         key: `task-ask:${card.id}`,
         bot: {look, glyph: '!'},
         title: card.why,
-        subtitle: card.risks?.includes('root') ? 'Isle quiere ejecutar esto · pide tu contraseña' : 'Isle quiere ejecutar esto',
+        subtitle: card.risks?.includes('root') ? 'Ela quiere ejecutar esto · pide tu contraseña' : 'Ela quiere ejecutar esto',
         code: card.command,
         tone: 'warn',
         glow: look.palette.glow,
@@ -665,8 +665,8 @@ export function assistant(state, open) {
         title: text,
         // An answer may take three lines, so a question at its end still shows.
         titleLines: 3,
-        subtitle: failed ? state.hint ?? '' : 'Asistente de Isle',
-        cutSubtitle: failed ? undefined : 'Asistente de Isle · Haz clic para leer más',
+        subtitle: failed ? state.hint ?? '' : 'Ela',
+        cutSubtitle: failed ? undefined : 'Ela · Haz clic para leer más',
         tone: failed ? 'bad' : 'good',
         // Long enough to read, as the open island gives it.
         duration: Math.min(ANSWER_MAX_DURATION, STATUS_DURATION + 45 * text.length),

@@ -15,6 +15,8 @@ Cambios sobre `gnome-extension/`:
 
 Los textos que genera el demonio `isled` siguen en inglés.
 
+El asistente se llama **Ela**: lo dice el prompt de `crates/isle-daemon/src/assistant/mod.rs` (`instructions`) y los subtítulos de sus avisos. El prompt va compilado en `isled`, así que `reaplicar.sh` no lo restaura: tras actualizar Isle hay que recompilar (`cargo build --release -p isle-daemon`) y copiar `target/release/isled` a `~/.local/bin/`. El binario original está en `~/.config/isle-es/isled-1.4.0-original`.
+
 ## Reaplicar sobre una instalación actualizada
 
 `es/reaplicar.sh` aplica `es.py` (diccionario), `apply.py`, `extras.py` y los `*.patch` sobre la extensión instalada en
